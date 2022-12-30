@@ -1,8 +1,7 @@
 <script setup lang="ts">
 import { ref } from 'vue';
-import { padded } from '../service/formatting';
 
-const memory = ref(new Int16Array(10));
+const registers = ref(new Int16Array(16));
 
 </script>
 
