@@ -5,6 +5,11 @@ import { ref } from "vue";
 <template>
   <button>Reset</button>
   Clock speed: <input /> Hz
+  <select>
+    <option value="2">Binary</option>
+    <option value="10">Decimal</option>
+    <option value="16">Hexadecimal</option>
+  </select>
 </template>
 
 <style scoped></style>
