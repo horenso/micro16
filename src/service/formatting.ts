@@ -6,6 +6,5 @@ export function padded(
     if (number === undefined) {
         return "";
     }
-    console.log(number);
     return number.toString(base).padStart(padding, '0');
 }
