@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, onBeforeMount } from "vue";
+import { ref, computed, onBeforeMount } from "vue";
 import { padded } from "../service/formatting";
 
 const CAPACITY = 2 ** 16;
@@ -7,6 +7,8 @@ const TABLE_SIZE = 10;
 const MAX_OFFSET = CAPACITY - TABLE_SIZE;
 
 const offset = ref(0);
+const offsetComputed = computed(() => {return isNaN(offset.value) ? 0 : offset.value})
+
 const memory = ref(new Int16Array(CAPACITY));
 
 onBeforeMount(() => {
@@ -17,9 +19,7 @@ onBeforeMount(() => {
 
 function updateOffset(event) {
   const newValue = parseInt(event.target.value);
-  if (isNaN(newValue)) {
-    offset.value = 0;
-  } else if (newValue < 0) {
+  if (newValue < 0) {
     offset.value = 0;
   } else if (newValue > MAX_OFFSET) {
     offset.value = MAX_OFFSET;
@@ -39,8 +39,8 @@ function updateOffset(event) {
       <th>Value</th>
     </tr>
     <tr v-for="(_, i) in TABLE_SIZE">
-      <td>{{ padded(i + offset, 2, 16) }}</td>
-      <td>{{ padded(memory[i + offset], 2, 16) }}</td>
+      <td>{{ padded(i + offsetComputed, 2, 16) }}</td>
+      <td>{{ padded(memory[i + offsetComputed], 2, 16) }}</td>
     </tr>
   </table>
 </template>
