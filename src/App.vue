@@ -6,10 +6,12 @@ import CodeEditor from "./components/CodeEditor.vue";
 </script>
 
 <template>
-  <Toolbar />
-  <Memory />
-  <Registers />
-  <CodeEditor />
+    <Toolbar />
+    <Memory />
+    <Registers />
+    <CodeEditor />
 </template>
 
-<style scoped></style>
+<style scoped>
+
+</style>
