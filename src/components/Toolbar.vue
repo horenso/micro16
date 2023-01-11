@@ -12,12 +12,11 @@ const registers = useRegistersStore();
 <template>
   <button>Reset</button>
   Clock speed: <input /> Hz
-  <select v-model="settings.numberSystem">
-    <option value="2">Binary</option>
-    <option value="10">Decimal</option>
-    <option value="16">Hexadecimal</option>
+  <select v-model.number="settings.numberSystem">
+    <option value=2>Binary</option>
+    <option value=10>Decimal</option>
+    <option value=16>Hexadecimal</option>
   </select>
-  Zero Padding: <input type="checkbox" v-model="settings.paddWithZeros" />
   <button
     @click="
       memory.junk();

@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref, computed } from "vue";
-import { padded } from "../service/formatting";
+import { formatNumber } from "../service/formatting";
 import { useSettingsStore } from "../stores/settings";
 import { useMemoryStore, CAPACITY } from "../stores/memory";
 
@@ -35,8 +35,8 @@ function updateOffset(event) {
             <th>Value</th>
         </tr>
         <tr v-for="(_, i) in TABLE_SIZE">
-            <td>{{ padded(i + offsetComputed, settings.numberSystem, 16, settings.paddWithZeros) }}</td>
-            <td>{{ padded(memory.at(i + offsetComputed), settings.numberSystem, 16, settings.paddWithZeros) }}</td>
+            <td>{{ formatNumber(i + offsetComputed, settings.numberSystem) }}</td>
+            <td>{{ formatNumber(memory.at(i + offsetComputed), settings.numberSystem) }}</td>
         </tr>
     </table>
 </template>
@@ -48,6 +48,8 @@ td {
     border: 1px solid black;
     border-collapse: collapse;
     font-family: "Courier New", monospace;
-    white-space: pre;
+}
+td {
+    width: 16em;
 }
 </style>

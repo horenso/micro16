@@ -26,7 +26,7 @@ export const useRegistersStore = defineStore('registers', {
         junk() {
             const newRegisters = new Int16Array(REGISTER_COUNT);
             for (let i = 0; i < REGISTER_COUNT; i++) {
-                newRegisters[i] = Math.floor(Math.random() * 10000);
+                newRegisters[i] = Math.floor(Math.random() * ((2**16)-1));
             }
             this.registers = newRegisters;
         }

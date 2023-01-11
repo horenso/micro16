@@ -11,7 +11,7 @@ export const useMemoryStore = defineStore('memory', {
         junk() {
             const newMemory = new Int16Array(CAPACITY);
             for (let i = 0; i < CAPACITY; i++) {
-                newMemory[i] = Math.floor(Math.random() * 10000);
+                newMemory[i] = Math.floor(Math.random() * ((2**16)-1));
             }
             this.memory = newMemory;
         },

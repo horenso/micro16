@@ -1,10 +1,10 @@
 <script setup lang="ts">
-import { padded } from "../service/formatting";
+import { formatNumber } from "../service/formatting";
 import { useRegistersStore, REGISTER_NAMES } from "../stores/registers";
 import { useSettingsStore } from "../stores/settings";
 
-const settings = useSettingsStore()
-const registers = useRegistersStore()
+const settings = useSettingsStore();
+const registers = useRegistersStore();
 </script>
 
 <template>
@@ -16,7 +16,7 @@ const registers = useRegistersStore()
         </tr>
         <tr v-for="(number, index) in registers.registers">
             <td>{{ REGISTER_NAMES[index] }}</td>
-            <td>{{ padded(number, settings.numberSystem, 16, settings.paddWithZeros) }}</td>
+            <td>{{ formatNumber(number, settings.numberSystem) }}</td>
         </tr>
     </table>
 </template>
@@ -28,6 +28,8 @@ td {
     border: 1px solid black;
     border-collapse: collapse;
     font-family: "Courier New", monospace;
-    white-space: pre;
+}
+td {
+    width: 16em;
 }
 </style>
