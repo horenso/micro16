@@ -22,5 +22,13 @@ export const useRegistersStore = defineStore('registers', {
         registers: new Int16Array(14),
     }), getters: {
         at: (state) => { return (index: number) => state.registers[index] }
+    }, actions: {
+        junk() {
+            const newRegisters = new Int16Array(REGISTER_COUNT);
+            for (let i = 0; i < REGISTER_COUNT; i++) {
+                newRegisters[i] = Math.floor(Math.random() * 10000);
+            }
+            this.registers = newRegisters;
+        }
     }
 });
