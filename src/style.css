@@ -1,0 +1,10 @@
+html, body {
+    margin: 0;
+}
+
+/* Global styles */
+
+.numberValue {
+    width: 16ch;
+    padding: 0 0.5ch 0 0.5ch;
+}

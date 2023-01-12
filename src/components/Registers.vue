@@ -16,7 +16,7 @@ const registers = useRegistersStore();
         </tr>
         <tr v-for="(number, index) in registers.registers">
             <td>{{ REGISTER_NAMES[index] }}</td>
-            <td>{{ formatNumber(number, settings.numberSystem) }}</td>
+            <td class="numberValue">{{ formatNumber(number, settings.numberSystem) }}</td>
         </tr>
     </table>
 </template>
@@ -28,8 +28,5 @@ td {
     border: 1px solid black;
     border-collapse: collapse;
     font-family: "Courier New", monospace;
-}
-td {
-    width: 16em;
 }
 </style>

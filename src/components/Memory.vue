@@ -27,7 +27,7 @@ function updateOffset(event) {
 
 <template>
     <h1>Memory</h1>
-    Memory from state:
+    Jump to:
     <input type="number" v-model="offset" @input="updateOffset" min="0" :max="MAX_OFFSET" />
     <table>
         <tr>
@@ -35,8 +35,8 @@ function updateOffset(event) {
             <th>Value</th>
         </tr>
         <tr v-for="(_, i) in TABLE_SIZE">
-            <td>{{ formatNumber(i + offsetComputed, settings.numberSystem) }}</td>
-            <td>{{ formatNumber(memory.at(i + offsetComputed), settings.numberSystem) }}</td>
+            <td class="numberValue">{{ formatNumber(i + offsetComputed, settings.numberSystem) }}</td>
+            <td class="numberValue">{{ formatNumber(memory.at(i + offsetComputed), settings.numberSystem) }}</td>
         </tr>
     </table>
 </template>
@@ -48,8 +48,5 @@ td {
     border: 1px solid black;
     border-collapse: collapse;
     font-family: "Courier New", monospace;
-}
-td {
-    width: 16em;
 }
 </style>

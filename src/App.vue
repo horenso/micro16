@@ -7,9 +7,9 @@ import CodeEditor from "./components/CodeEditor.vue";
 
 <template>
     <Toolbar />
+    <CodeEditor />
     <Memory />
     <Registers />
-    <CodeEditor />
 </template>
 
 <style scoped>
