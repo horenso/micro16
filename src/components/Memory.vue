@@ -23,13 +23,27 @@ function updateOffset(event) {
         offset.value = newValue;
     }
 }
+
+function scrollUp() {
+    console.log("scrollUp");
+}
+
+function scrollDown(event) {
+    const wheelDelta = Math.ceil(event.wheelDelta);
+    const newOffset = offset.value - wheelDelta * 0.1;
+    if (wheelDelta > 0) {
+        offset.value = newOffset < 0 ? 0 : newOffset;
+    } else {
+        offset.value = newOffset > MAX_OFFSET ? MAX_OFFSET : newOffset;
+    }
+}
 </script>
 
 <template>
     <h1>Memory</h1>
     Jump to:
     <input type="number" v-model="offset" @input="updateOffset" min="0" :max="MAX_OFFSET" />
-    <table>
+    <table v-on:wheel.prevent="scrollDown">
         <tr>
             <th>Address</th>
             <th>Value</th>
