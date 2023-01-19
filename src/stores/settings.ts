@@ -4,6 +4,6 @@ export const useSettingsStore = defineStore('settings', {
     state: () => {
         return {
             numberSystem: 10,
-        }
-    }
+        };
+    },
 });
