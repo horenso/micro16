@@ -6,7 +6,6 @@ start: build-base
 		--interactive --tty \
 		--publish 5000:5000 \
 		--volume ${PWD}:/app \
-		--user ${UID}:${UID} \
 		--rm \
 		micro16-app-base
 
@@ -14,6 +13,7 @@ bash: build-base
 	docker run \
 		--interactive --tty \
 		--entrypoint bash \
+		--volume ${PWD}:/app \
 		--user ${UID}:${UID} \
 		--rm \
 		micro16-app-base
