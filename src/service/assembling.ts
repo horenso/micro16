@@ -39,9 +39,9 @@ export function assembleLine(line: string): ParseError | number {
             }
             seenReadWrite = true;
             if (currentToken === 'rd') {
-                result |= 0x600000;
+                result |= 0x0060_0000;
             } else {
-                result |= 0x200000;
+                result |= 0x0020_0000;
             }
         }
         if (currentToken === 'goto' || currentToken === 'if') {
@@ -85,9 +85,9 @@ function parseJump(
         // Conditional jump
         let maybeToken = tokens.shift();
         if (maybeToken === 'N') {
-            result |= 0x20000000;
+            result |= 0x2000_0000;
         } else if (maybeToken === 'Z') {
-            result |= 0x40000000;
+            result |= 0x4000_0000;
         } else {
             return new ParseError('Invalid jump statement!');
         }
@@ -98,7 +98,7 @@ function parseJump(
         currentToken = maybeToken;
     } else {
         // Unconditional jump
-        result |= 0x60000000;
+        result |= 0x6000_0000;
     }
     if (currentToken !== 'goto') {
         return new ParseError('Invalid jump statement!');
@@ -128,3 +128,5 @@ function parseCalculation(
     result |= targetRegister << 16;
     return result;
 }
+
+function getRegisterIndex(registerName: string): number {}

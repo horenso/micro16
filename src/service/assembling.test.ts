@@ -29,6 +29,10 @@ test('Calculations', () => {
     expect(assembleLine('R1 <- 1 + -1')).toBeInstanceOf(ParseError);
 });
 
+test('Multiple registers', () => {
+    expect(assembleLine('MAR<-R6; R1<-R6; MBR<-R6')).toBe(0x0195_aa00);
+});
+
 test('Multiplication Example', () => {
     // Multiplication example from book page 141
     expect(assembleLine('R7 <- R7+R7')).toBe(0x0a1b_1100);

@@ -1,10 +1,11 @@
-# base has only npm setup. It requires the directory to be mounted.
+# base is for development, it requires that the directory is mounted into /app.
 FROM node as base
 WORKDIR /app
-ENTRYPOINT npm i && npm run dev
+ENTRYPOINT npm i && chmod -R 777 node_modules && npm run dev
 
 # full is a standalone image.
 FROM base as full
-COPY . ./
+COPY package*.json /app/
 RUN npm i
+COPY . ./
 ENTRYPOINT npm run dev
