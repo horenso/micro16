@@ -9,6 +9,14 @@ start: build-base
 		--rm \
 		micro16-app-base
 
+test: build-test
+	docker run \
+		--interactive --tty \
+		--publish 5000:5000 \
+		--volume ${PWD}:/app \
+		--rm \
+		micro16-app-test
+
 bash: build-base
 	docker run \
 		--interactive --tty \
@@ -20,6 +28,9 @@ bash: build-base
 
 build-base:
 	docker build --target base --tag micro16-app-base .
+
+build-test:
+	docker build --target test --tag micro16-app-test .
 
 build-full:
 	docker build --target full --tag micro16-app-full .

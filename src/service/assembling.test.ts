@@ -1,21 +1,24 @@
-import { assembleLine, ParseError } from './assembling';
+import { assembleLine, AssemblingError } from './assembling';
 import { test, expect } from 'vitest';
 
 test('Read/Write', () => {
     expect(assembleLine('wr')).toBe(0x0020_0000);
     expect(assembleLine('rd')).toBe(0x0060_0000);
-    expect(assembleLine('rd;rd')).toBeInstanceOf(ParseError);
-    expect(assembleLine('wr;rd')).toBeInstanceOf(ParseError);
-    expect(assembleLine('wr;wr')).toBeInstanceOf(ParseError);
+    expect(assembleLine('rd;rd')).toBeInstanceOf(AssemblingError);
+    expect(assembleLine('wr;rd')).toBeInstanceOf(AssemblingError);
+    expect(assembleLine('wr;wr')).toBeInstanceOf(AssemblingError);
 });
 
 test('Jumps', () => {
-    expect(assembleLine('goto 4')).toBe(0x6000_0004);
-    expect(assembleLine('goto 255')).toBe(0x6000_00ff);
-    expect(assembleLine('goto -1')).toBeInstanceOf(ParseError);
-    expect(assembleLine('goto 256')).toBeInstanceOf(ParseError);
+    expect(assembleLine(';;goto 4;')).toBe(0x6000_0004);
+    expect(assembleLine('goto   255;;')).toBe(0x6000_00ff);
+    expect(assembleLine('goto -1')).toBeInstanceOf(AssemblingError);
+    expect(assembleLine('goto 256')).toBeInstanceOf(AssemblingError);
     expect(assembleLine('if N goto 50')).toBe(0x2000_0032);
     expect(assembleLine('if Z goto 50')).toBe(0x4000_0032);
+    expect(assembleLine('(R1); if Z goto 30')).toBe(0x4000_051e);
+    expect(assembleLine('R1 if Z goto 30')).toBe(0x4000_051e);
+    expect(assembleLine('(((R1)));;; if Z goto 30')).toBe(0x4000_051e);
 });
 
 test('Calculations', () => {
@@ -26,11 +29,12 @@ test('Calculations', () => {
     expect(assembleLine('R0 <- lsh(R1 + R2)')).toBe(0x0a146500);
     expect(assembleLine('R0 <- rsh(R1 + R2)')).toBe(0x0c14_6500);
     expect(assembleLine('R1 <- 1 + (-1)')).toBe(0x08152100);
-    expect(assembleLine('R1 <- 1 + -1')).toBeInstanceOf(ParseError);
+    expect(assembleLine('R1 <- 1 + -1')).toBeInstanceOf(AssemblingError);
 });
 
 test('Multiple registers', () => {
     expect(assembleLine('MAR<-R6; R1<-R6; MBR<-R6')).toBe(0x0195_aa00);
+    expect(assembleLine('MAR<-R6; MBR<-R8; wr; R1<-R8')).toBe(0x01b5_ac00);
 });
 
 test('Multiplication Example', () => {

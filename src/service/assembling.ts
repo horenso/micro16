@@ -1,6 +1,13 @@
 import { REGISTER_NAMES } from '../stores/registers';
+import {
+    Register,
+    isRegister,
+    getRegisterIndex,
+    RefisterOrMemoryBurffer,
+    isMemoryBuffer,
+} from './registers';
 
-export class ParseError {
+export class AssemblingError {
     private message: string;
 
     constructor(message: string) {
@@ -12,121 +19,116 @@ export class ParseError {
     }
 }
 
-export function assembleLine(line: string): ParseError | number {
-    if (line === '') {
-        return 0;
+class Assembler {
+    tokens: string[];
+    current: string | null = null;
+    result = 0;
+
+    // There can only be one read or write and one goto.
+    seenReadWrite = false;
+    seenGoto = false;
+    busA: Register | null = null;
+    busB: Register | null = null;
+
+    constructor(instruction: string) {
+        this.tokens = instruction.split(/\s+|;/);
+        this.current = this.nextToken();
     }
-    let result = 0;
 
-    // Booleans for things that can only occur once per instruction:
-    let seenReadWrite = false;
-    let seenGoto = false;
-    let seenCalculation = false;
-
-    let tokens = line.split(/\s+|;/);
-    console.log('Tokens:', tokens);
-    for (
-        let currentToken = tokens.shift();
-        currentToken !== undefined;
-        currentToken = tokens.shift()
-    ) {
-        if (currentToken === ';') {
-            continue; // Ignore for now.
-        }
-        if (currentToken === 'rd' || currentToken === 'wr') {
-            if (seenReadWrite) {
-                return new ParseError('Only one read/write permitted');
-            }
-            seenReadWrite = true;
-            if (currentToken === 'rd') {
-                result |= 0x0060_0000;
-            } else {
-                result |= 0x0020_0000;
-            }
-        }
-        if (currentToken === 'goto' || currentToken === 'if') {
-            if (seenGoto) {
-                return new ParseError('Only one goto permitted.');
-            }
-            seenGoto = true;
-            const resultOrError = parseJump(result, currentToken, tokens);
-            if (resultOrError instanceof ParseError) {
-                return resultOrError;
-            } else {
-                result = resultOrError;
-            }
-        }
-        if (REGISTER_NAMES.includes(currentToken)) {
-            if (seenCalculation) {
-                return new ParseError('Only one calculation permitted.');
-            }
-            const resultOrError = parseCalculation(
-                result,
-                currentToken,
-                tokens
-            );
-            if (resultOrError instanceof ParseError) {
-                return resultOrError;
-            } else {
-                result |= resultOrError;
-            }
-        }
-    }
-    console.log(result);
-    return result;
-}
-
-function parseJump(
-    result: number,
-    currentToken: string,
-    tokens: string[]
-): number | ParseError {
-    if (currentToken === 'if') {
-        // Conditional jump
-        let maybeToken = tokens.shift();
-        if (maybeToken === 'N') {
-            result |= 0x2000_0000;
-        } else if (maybeToken === 'Z') {
-            result |= 0x4000_0000;
+    private nextToken(): string | null {
+        const last = this.tokens.shift();
+        if (last === undefined) {
+            return null;
         } else {
-            return new ParseError('Invalid jump statement!');
+            return last;
         }
-        maybeToken = tokens.shift();
-        if (maybeToken === undefined) {
-            return new ParseError('Invalid jump statement!');
+    }
+
+    private tryParseReadWrite(): void {
+        if (this.seenReadWrite) {
+            throw new AssemblingError('Only one read/write permitted');
         }
-        currentToken = maybeToken;
-    } else {
-        // Unconditional jump
-        result |= 0x6000_0000;
+        this.seenReadWrite = true;
+        if (this.current === 'rd') {
+            this.result |= 0x0060_0000;
+        } else {
+            this.result |= 0x0020_0000;
+        }
+        this.current = this.nextToken();
     }
-    if (currentToken !== 'goto') {
-        return new ParseError('Invalid jump statement!');
+
+    private tryParseGoto(): void {
+        if (this.seenGoto) {
+            throw new AssemblingError('Only one goto permitted.');
+        }
+        this.seenGoto = true;
+        if (this.current === 'if') {
+            // Conditional jump
+            this.current = this.nextToken();
+            if (this.current === 'N') {
+                this.result |= 0x2000_0000;
+            } else if (this.current === 'Z') {
+                this.result |= 0x4000_0000;
+            } else {
+                throw new AssemblingError('Invalid jump statement!');
+            }
+            this.current = this.nextToken();
+        } else {
+            // Unconditional jump
+            this.result |= 0x6000_0000;
+        }
+        if (this.current !== 'goto') {
+            throw new AssemblingError('Invalid jump statement!');
+        }
+        this.current = this.nextToken();
+        if (this.current === null) {
+            throw new AssemblingError('Invalid jump statement!');
+        }
+        const jumpAddress = parseInt(this.current);
+        if (jumpAddress < 0 || jumpAddress > 255) {
+            throw new AssemblingError(
+                'Jump address must be between 0 and 255.'
+            );
+        }
+        this.result |= jumpAddress;
     }
-    let maybeToken = tokens.shift();
-    if (maybeToken === undefined) {
-        return new ParseError('Invalid jump statement!');
+
+    private tryParseRegisterUse(): void {
+        if (!isRegister(this.current!) && !isMemoryBuffer(this.current!)) {
+            throw new AssemblingError('Unidentifiable register name');
+        }
+        const register = this.current;
+        this.current = this.nextToken();
+        if (this.current === '<-') {
+            // This is an assignment to a register.
+            this.current = this.nextToken();
+        } else {
+            if (!isRegister(register)) this.busA = registerFromString(register);
+            return true;
+        }
+        return false;
     }
-    currentToken = maybeToken;
-    if (currentToken === undefined) {
-        return new ParseError('Invalid jump statement!');
+
+    public parse(): AssemblingError | number {
+        while (this.current !== null) {
+            try {
+                if (this.current === 'goto' || this.current === 'if') {
+                    this.tryParseGoto();
+                } else if (this.current === 'rd' || this.current === 'wr') {
+                    this.tryParseReadWrite();
+                } else {
+                    this.tryParseRegisterUse();
+                }
+            } catch (e) {
+                // @ts-ignore
+                return e;
+            }
+        }
+        return this.result;
     }
-    const jumpAddress = parseInt(currentToken);
-    if (jumpAddress < 0 || jumpAddress > 255) {
-        return new ParseError('Jump address must be between 0 and 255.');
-    }
-    result |= jumpAddress;
-    return result;
 }
 
-function parseCalculation(
-    result: number,
-    currentToken: string,
-    tokens: string[]
-): number | ParseError {
-    const targetRegister = REGISTER_NAMES.indexOf(currentToken);
-    result |= targetRegister << 16;
-    return result;
+export function assembleLine(line: string): number | AssemblingError {
+    const assembler = new Assembler(line);
+    return assembler.parse();
 }
-
-function getRegisterIndex(registerName: string): number {}
