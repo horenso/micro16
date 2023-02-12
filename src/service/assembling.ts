@@ -3,10 +3,9 @@ import {
     Constant,
     Register,
     isRegister,
-    getRegisterIndex,
-    RefisterOrMemoryBurffer,
     isMemoryBuffer,
     MemoryBuffer,
+    isConstantRegister,
 } from './registers';
 
 interface Assignment {
@@ -20,69 +19,50 @@ interface Jump {
     line: number;
 }
 
-class ParsedInstruction {
+interface ParsedInstruction {
     assignments: Assignment[];
     jump: Jump | null;
-    read: boolean;
-    write: boolean;
+    readWrite: 'rd' | 'wr' | null;
     mar: boolean;
     mbr: boolean;
-
-    constructor(
-        assignments: Assignment[],
-        jump: Jump | null,
-        read: boolean,
-        write: boolean,
-        mar: boolean,
-        mbr: boolean
-    ) {
-        this.assignments = assignments;
-        this.jump = jump;
-        this.read = read;
-        this.write = write;
-        this.mar = mar;
-        this.mbr = mbr;
-    }
 }
 
-export class AssemblingError {
-    private message: string;
-
-    constructor(message: string) {
-        this.message = message;
-    }
-
-    toString(): string {
-        return this.message;
-    }
+interface ParsingError {
+    message: string;
 }
 
-export class ParingError {
-    private message: string;
+type ParsingResult =
+    | { ok: true; instruction: ParsedInstruction }
+    | { ok: false; error: ParsingError };
 
-    constructor(message: string) {
-        this.message = message;
-    }
-
-    toString(): string {
-        return this.message;
-    }
+interface AssemblingError {
+    message: string;
 }
 
-class Assembler {
+type AssemblingResult =
+    | { ok: true; result: number }
+    | { ok: false; error: AssemblingError };
+
+class Parser {
     tokens: string[];
-    current: string | null = null;
-    result = 0;
+    current_token: string | null = null;
 
-    // There can only be one read or write and one goto.
     seenReadWrite = false;
     seenGoto = false;
-    busA: Register | null = null;
-    busB: Register | null = null;
+
+    result: ParsedInstruction = {
+        assignments: [],
+    jump: null,
+    readWrite: null,
+    mar: false,
+    mbr: false,
+    }
+    
+    error: ParsingError | null = null;
 
     constructor(instruction: string) {
         this.tokens = instruction.split(/\s+|;/);
-        this.current = this.nextToken();
+        this.current_token = this.nextToken();
     }
 
     private nextToken(): string | null {
@@ -94,91 +74,104 @@ class Assembler {
         }
     }
 
-    private tryParseReadWrite(): void {
+    private tryParseReadWrite(current_token: 'rd' | 'wr'): void {
         if (this.seenReadWrite) {
-            throw new AssemblingError('Only one read/write permitted');
+            this.error = {message: 'Only one read/write permitted'};
+            return;
         }
         this.seenReadWrite = true;
-        if (this.current === 'rd') {
-            this.result |= 0x0060_0000;
-        } else {
-            this.result |= 0x0020_0000;
-        }
-        this.current = this.nextToken();
+        this.result.readWrite = current_token;
+        this.current_token = this.nextToken();
     }
 
     private tryParseGoto(): void {
         if (this.seenGoto) {
-            throw new AssemblingError('Only one goto permitted.');
+            this.error = {message: 'Only one goto permitted.'};
         }
         this.seenGoto = true;
-        if (this.current === 'if') {
+        let condition: 'N' | 'Z' | null = null;
+        if (this.current_token === 'if') {
             // Conditional jump
-            this.current = this.nextToken();
-            if (this.current === 'N') {
-                this.result |= 0x2000_0000;
-            } else if (this.current === 'Z') {
-                this.result |= 0x4000_0000;
-            } else {
-                throw new AssemblingError('Invalid jump statement!');
+            this.current_token = this.nextToken();
+            if (this.current_token !== 'N' && this.current_token !== 'Z') {
+                this.error = {message: 'Invalid jump statement!'};
+                return;
             }
-            this.current = this.nextToken();
-        } else {
-            // Unconditional jump
-            this.result |= 0x6000_0000;
+            condition = this.current_token;
+            this.current_token = this.nextToken();
         }
-        if (this.current !== 'goto') {
-            throw new AssemblingError('Invalid jump statement!');
+        if (this.current_token !== 'goto') {
+            this.error = {message: 'Invalid jump statement!'};
+            return;
         }
-        this.current = this.nextToken();
-        if (this.current === null) {
-            throw new AssemblingError('Invalid jump statement!');
+        this.current_token = this.nextToken();
+        if (this.current_token === null) {
+            this.error = {message: 'Invalid jump statement!'};
+            return;
         }
-        const jumpAddress = parseInt(this.current);
+        const jumpAddress = parseInt(this.current_token);
         if (jumpAddress < 0 || jumpAddress > 255) {
-            throw new AssemblingError(
-                'Jump address must be between 0 and 255.'
-            );
+            this.error = {message: 'Jump address must be between 0 and 255.'};
+            return;
         }
-        this.result |= jumpAddress;
+        this.result.jump = {condition: condition, line: jumpAddress};
     }
 
     private tryParseRegisterUse(): void {
-        if (!isRegister(this.current!) && !isMemoryBuffer(this.current!)) {
-            throw new AssemblingError('Unidentifiable register name');
+        if (!isRegister(this.current_token!) && !isMemoryBuffer(this.current_token!)) {
+            this.error = {message: 'Unidentifiable register name'};
+            return;
         }
-        const register = this.current;
-        this.current = this.nextToken();
-        if (this.current === '<-') {
-            // This is an assignment to a register.
-            this.current = this.nextToken();
+        const assignment: Assignment = {destination: this.current_token, left: null, right: null};
+        this.current_token = this.nextToken();
+        if (this.current_token !== '<-') {
+            this.result.assignments.push(assignment);
+            return;
         } else {
-            if (!isRegister(register)) this.busA = registerFromString(register);
-            return true;
+            this.current_token = this.nextToken();
+            if (!isRegister(this.current_token!) && !isMemoryBuffer(this.current_token!) && !isConstantRegister(this.current_token!)) {
+                this.error = {message: 'Unidentifiable register name'};
+                return;
+            }
+            assignment.left = this.current_token;
         }
         return false;
     }
 
-    public parse(): AssemblingError | number {
-        while (this.current !== null) {
-            try {
-                if (this.current === 'goto' || this.current === 'if') {
+    public parse(): ParsingResult {
+        while (this.current_token !== null && this.error === null) {
+                if (this.current_token === 'goto' || this.current_token === 'if') {
                     this.tryParseGoto();
-                } else if (this.current === 'rd' || this.current === 'wr') {
-                    this.tryParseReadWrite();
+                } else if (this.current_token === 'rd' || this.current_token === 'wr') {
+                    this.tryParseReadWrite(this.current_token);
                 } else {
                     this.tryParseRegisterUse();
                 }
-            } catch (e) {
-                // @ts-ignore
-                return e;
-            }
         }
         return this.result;
     }
 }
 
+class Assembler {
+    private instruction: ParsedInstruction;
+    private result: number = 0;
+
+    constructor(instruction: ParsedInstruction) {
+        this.instruction = instruction;
+    }
+
+    public assemble(): AssemblingResult {
+        const readWrite = this.instruction.readWrite;
+        if (readWrite === 'r') {
+            this.result |= 0x0060_0000;
+        } else if (readWrite === 'w') {
+            this.result |= 0x0020_0000;
+        }
+        return {ok: true, result: this.result};
+    }
+}
+
 export function assembleLine(line: string): number | AssemblingError {
     const assembler = new Assembler(line);
-    return assembler.parse();
+    return assembler.assemble();
 }
