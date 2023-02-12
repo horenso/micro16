@@ -1,13 +1,63 @@
 import { REGISTER_NAMES } from '../stores/registers';
 import {
+    Constant,
     Register,
     isRegister,
     getRegisterIndex,
     RefisterOrMemoryBurffer,
     isMemoryBuffer,
+    MemoryBuffer,
 } from './registers';
 
+interface Assignment {
+    destination: Register | MemoryBuffer;
+    left: Register | Constant | null;
+    right: Register | Constant | null;
+}
+
+interface Jump {
+    condition: 'N' | 'Z' | null;
+    line: number;
+}
+
+class ParsedInstruction {
+    assignments: Assignment[];
+    jump: Jump | null;
+    read: boolean;
+    write: boolean;
+    mar: boolean;
+    mbr: boolean;
+
+    constructor(
+        assignments: Assignment[],
+        jump: Jump | null,
+        read: boolean,
+        write: boolean,
+        mar: boolean,
+        mbr: boolean
+    ) {
+        this.assignments = assignments;
+        this.jump = jump;
+        this.read = read;
+        this.write = write;
+        this.mar = mar;
+        this.mbr = mbr;
+    }
+}
+
 export class AssemblingError {
+    private message: string;
+
+    constructor(message: string) {
+        this.message = message;
+    }
+
+    toString(): string {
+        return this.message;
+    }
+}
+
+export class ParingError {
     private message: string;
 
     constructor(message: string) {

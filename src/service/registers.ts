@@ -2,7 +2,7 @@ const CONSTANT_REGISTERS = {
     ZERO: 0x0,
     ONE: 0x1,
     MINUS_ONE: 0x2,
-};
+} as const;
 
 const REGISTERS = {
     PC: 0x3,
@@ -22,6 +22,7 @@ const REGISTERS = {
 
 const BUFFERS = ['MAR', 'MBR'] as const;
 
+export type Constant = keyof typeof CONSTANT_REGISTERS;
 export type Register = keyof typeof REGISTERS;
 export type MemoryBuffer = typeof BUFFERS[number];
 export type RefisterOrMemoryBurffer = Register | MemoryBuffer;
