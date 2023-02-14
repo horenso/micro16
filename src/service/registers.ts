@@ -24,7 +24,10 @@ const BUFFERS = ['MAR', 'MBR'] as const;
 
 export type Constant = keyof typeof CONSTANT_REGISTERS;
 export type Register = keyof typeof REGISTERS;
+export type RegisterOrConstant = Register | Constant;
 export type MemoryBuffer = typeof BUFFERS[number];
+export type WriteOnlyBuffer = 'MAR';
+export type ReadOnlyBuffer = 'MBR';
 export type RefisterOrMemoryBurffer = Register | MemoryBuffer;
 
 export function isRegister(name: string): name is Register {
