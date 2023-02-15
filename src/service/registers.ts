@@ -21,14 +21,30 @@ const REGISTERS = {
 } as const;
 
 const BUFFERS = ['MAR', 'MBR'] as const;
+const WRITE_ONLY_BUFFER = 'MAR';
+const READ_ONLY_BUFFER = 'MBR';
 
 export type Constant = keyof typeof CONSTANT_REGISTERS;
 export type Register = keyof typeof REGISTERS;
 export type RegisterOrConstant = Register | Constant;
 export type MemoryBuffer = typeof BUFFERS[number];
-export type WriteOnlyBuffer = 'MAR';
-export type ReadOnlyBuffer = 'MBR';
+export type WriteOnlyBuffer = typeof WRITE_ONLY_BUFFER;
+export type ReadOnlyBuffer = typeof READ_ONLY_BUFFER;
 export type RefisterOrMemoryBurffer = Register | MemoryBuffer;
+export type Writable = Register | WriteOnlyBuffer;
+export type Readable = Register | Constant | ReadOnlyBuffer;
+
+export function isWritable(name: string): name is Writable {
+    return name in REGISTERS || name === WRITE_ONLY_BUFFER;
+}
+
+export function isReadable(name: string): name is Readable {
+    return (
+        name in REGISTERS ||
+        name in CONSTANT_REGISTERS ||
+        name === READ_ONLY_BUFFER
+    );
+}
 
 export function isRegister(name: string): name is Register {
     return name in REGISTERS;
