@@ -5,40 +5,41 @@ import {
     isWritable,
 } from '../registers';
 
-import { Error, isOperator, ParsedInstruction, ParsingResult } from './types';
+import {
+    Error,
+    Expression,
+    isOperator,
+    ParsedInstruction,
+    Result,
+    Shift,
+    Statement,
+} from './types';
 
-export function parseLine(line: string): ParsingResult {
+export function parseLine(line: string): Result<ParsedInstruction> {
     const parser = new Parser(line);
     return parser.parse();
 }
 
 class Parser {
     tokens: string[];
-    current_token: string | null = null;
+    current_token?: string;
 
     seenReadWrite = false;
     seenGoto = false;
 
     result: ParsedInstruction = {
         statements: [],
-        jump: null,
-        readWrite: null,
     };
 
-    error: Error | null = null;
+    error: Error | undefined;
 
     constructor(instruction: string) {
         this.tokens = instruction.split(/\s+|;/);
         this.current_token = this.nextToken();
     }
 
-    private nextToken(): string | null {
-        const last = this.tokens.shift();
-        if (last === undefined) {
-            return null;
-        } else {
-            return last;
-        }
+    private nextToken(): string | undefined {
+        return this.tokens.shift();
     }
 
     private tryParseReadWrite(current_token: 'rd' | 'wr'): void {
@@ -56,7 +57,7 @@ class Parser {
             this.error = { message: 'Only one goto permitted.' };
         }
         this.seenGoto = true;
-        let condition: 'N' | 'Z' | null = null;
+        let condition: 'N' | 'Z' | undefined;
         if (this.current_token === 'if') {
             // Conditional jump
             this.current_token = this.nextToken();
@@ -72,7 +73,7 @@ class Parser {
             return;
         }
         this.current_token = this.nextToken();
-        if (this.current_token === null) {
+        if (this.current_token === undefined) {
             this.error = { message: 'Invalid jump statement!' };
             return;
         }
@@ -84,7 +85,21 @@ class Parser {
         this.result.jump = { condition: condition, toAddress: jumpAddress };
     }
 
+    private parseExpression(): Result<Expression> {
+        return { ok: true, result: { left: 'R8' } };
+    }
+
     private tryParseStatement(): void {
+        let shift: Shift | undefined;
+
+        // It could start with a location or a call to lsh/rsh.
+        if (this.current_token === 'lsh') {
+            shift = 'left';
+            const expression = this.parseExpression();
+        } else if (this.current_token === 'rsh') {
+            shift = 'right';
+            const expression = this.parseExpression();
+        }
         if (
             !isRegister(this.current_token!) &&
             !isMemoryBuffer(this.current_token!)
@@ -103,7 +118,7 @@ class Parser {
             }
             this.result.statements.push({
                 type: 'PassThrough',
-                destination: location,
+                dest: location,
                 shift: null,
             });
             return;
@@ -146,13 +161,14 @@ class Parser {
         }
         this.result.statements.push({
             type: 'Assignment',
-            destination: location,
+            dest: location,
             left: left,
             right: right,
             operator: operator,
-            shift: null,
         });
     }
+
+    private checkStatement() {}
 
     public parse(): ParsingResult {
         while (this.current_token !== null && this.error === null) {

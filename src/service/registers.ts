@@ -31,7 +31,7 @@ export type MemoryBuffer = typeof BUFFERS[number];
 export type WriteOnlyBuffer = typeof WRITE_ONLY_BUFFER;
 export type ReadOnlyBuffer = typeof READ_ONLY_BUFFER;
 export type RefisterOrMemoryBurffer = Register | MemoryBuffer;
-export type Writable = Register | WriteOnlyBuffer;
+export type Writable = Register | MemoryBuffer;
 export type Readable = Register | Constant | ReadOnlyBuffer;
 
 export function isWritable(name: string): name is Writable {
@@ -54,7 +54,9 @@ export function isMemoryBuffer(name: string): name is MemoryBuffer {
     return name in BUFFERS;
 }
 
-export function isConstantRegister(name: string): boolean {
+type ConstantString = '0' | '1' | '-1';
+
+export function isCOnstantRegister(name: string): name is ConstantString {
     switch (name) {
         case '0':
         case '1':
@@ -65,11 +67,14 @@ export function isConstantRegister(name: string): boolean {
     }
 }
 
-export function toRegister(name: string): Register | null {
-    if (isRegister(name)) {
-        return name;
-    } else {
-        return null;
+export function toConstantRegister(name: ConstantString): Constant {
+    switch (name) {
+        case '0':
+            return 'ZERO';
+        case '1':
+            return 'ONE';
+        case '-1':
+            return 'MINUS_ONE';
     }
 }
 
