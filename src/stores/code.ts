@@ -44,7 +44,7 @@ export const useCodeStore = defineStore('code', {
                 if (result.ok) {
                     newAssembledCode.push(result.result);
                 } else {
-                    newAssembledCode.push(result.error.message);
+                    newAssembledCode.push(result.errorMessage);
                 }
             });
             this.assembledCode = newAssembledCode;

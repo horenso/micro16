@@ -26,7 +26,7 @@ const codeStore = useCodeStore();
 }
 .assemledCode {
     outline: 1px solid black;
-    width: 32ch;
+    width: 80%;
     padding: 0 0.5ch 0 0.5ch;
     height: 300px;
     white-space: pre;

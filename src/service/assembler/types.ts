@@ -1,30 +1,33 @@
 import { Readable, Writable } from '../registers';
 
 export type Shift = 'left' | 'right';
-const OPERATOR = ['+', '&', '~'] as const;
+const OPERATOR: readonly string[] = ['+', '&', '~'] as const;
 export type Operator = typeof OPERATOR[number];
 
-export function isOperator(str: string): str is Operator {
-    return str in OPERATOR;
+export function isOperator(str?: string): str is Operator {
+    if (str === undefined) {
+        return false;
+    }
+    return OPERATOR.includes(str);
 }
 
-export interface NoopExpression {
+interface NoOp {
     left: Readable;
+    operator?: never;
+    right?: never;
 }
 
-export interface OpExpression extends NoopExpression {
+interface Op {
+    left: Readable;
     operator: Operator;
     right: Readable;
 }
 
-export type Expression = NoopExpression | OpExpression;
+export type Operation = NoOp | Op;
 
-interface BaseStatement {
-    shift?: Shift;
-    dest?: Writable;
-}
+export type Expression = Operation & { shift?: Shift };
 
-export type Statement = BaseStatement & Expression;
+export type Statement = Expression & { dest?: Writable };
 
 export interface Jump {
     condition?: 'N' | 'Z';
@@ -37,16 +40,14 @@ export interface ParsedInstruction {
     readWrite?: 'rd' | 'wr';
 }
 
-export interface Error {
-    message: string;
+export type Result<T> =
+    | { ok: true; result: T }
+    | { ok: false; errorMessage: string };
+
+export function Ok<T>(result: T): Result<T> {
+    return { ok: true, result: result };
 }
 
-export type Result<T> = { ok: true; result: T } | { ok: false; error: Error };
-
-// export type ParsingResult =
-//     | { ok: true; instruction: ParsedInstruction }
-//     | { ok: false; error: Error };
-
-// export type AssemblingResult =
-//     | { ok: true; result: number }
-//     | { ok: false; error: Error };
+export function Err<T>(message: string): Result<T> {
+    return { ok: false, errorMessage: message };
+}

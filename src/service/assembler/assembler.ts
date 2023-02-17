@@ -1,6 +1,5 @@
 import { RegisterOrConstant } from '../registers';
-import { parseLine } from './parser';
-import { AssemblingResult, ParsedInstruction } from './types';
+import { ParsedInstruction } from './types';
 
 export class Assembler {
     private instruction: ParsedInstruction;
