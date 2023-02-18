@@ -1,68 +1,157 @@
-import { Result, Ok, Err } from './types';
+import { isLocation, isReadable, isWritable } from '../registers';
+import { Result, Ok, Err, Token, Operator } from './types';
+
+export function lex(line: string): Result<Token[]> {
+    const lexer = new Lexer(line);
+    return lexer.lex();
+}
 
 class Lexer {
-    private result: string[] = [];
+    private result: Token[] = [];
 
     constructor(private line: string) {}
 
+    private advance(amount: number) {
+        this.line = this.line.slice(amount);
+    }
+
     private ignoreWhitespace(): boolean {
-        const whitespacesMatch = this.line.match(/^(\s|;+)/);
-        // Ignore whitespaces and semicolons
-        if (whitespacesMatch !== null) {
-            this.line = this.line.slice(whitespacesMatch[0].length);
+        const whitespaceMatch = this.line.match(/^(\s|;+)/);
+        // Ignore whitespace and semicolons
+        if (whitespaceMatch !== null) {
+            this.line = this.line.slice(whitespaceMatch[0].length);
             return true;
         }
         return false;
     }
 
-    private matchOne(char: string, result?: string): boolean {
-        if (this.line.startsWith(char)) {
-            if (result !== undefined) {
-                this.result.push(result);
+    private matchPositiveNumber(): boolean {
+        const numberMatch = this.line.match(/^\d+/);
+        const previousToken: Token | undefined =
+            this.result.length > 0
+                ? this.result[this.result.length - 1]
+                : undefined;
+        if (numberMatch === null) {
+            return false;
+        }
+        const match = numberMatch[0];
+
+        // This could arguably be done in the Parser,
+        // but since it's so simple we'll do it here.
+        // '0' or '1' are locations expect when
+        // the previous token is 'goto', then
+        // they are jump addresses.
+        if (
+            (match === '0' || match === '1') &&
+            previousToken?.type === 'GOTO'
+        ) {
+            if (match === '0') {
+                this.result.push({
+                    type: 'LOCATION',
+                    location: 'ZERO',
+                    readable: true,
+                    writable: false,
+                });
             } else {
-                this.result.push(char);
+                this.result.push({
+                    type: 'LOCATION',
+                    location: 'ONE',
+                    readable: true,
+                    writable: false,
+                });
             }
-            this.line = this.line.slice(1);
+        } else {
+            this.result.push({
+                type: 'NUMBER',
+                number: parseInt(numberMatch[0], 10),
+            });
+        }
+
+        this.advance(numberMatch[0].length);
+        return false;
+    }
+
+    private matchOperator(): boolean {
+        const operatorMatch = this.line.match(/^(\+|-|&)/);
+        if (operatorMatch !== null) {
+            const match = operatorMatch[0] as Operator;
+            this.result.push({ type: 'OPERATOR', operator: match });
+            this.advance(operatorMatch[0].length);
             return true;
         }
         return false;
     }
 
-    private matchRegex(reg: RegExp, result?: string): boolean {
-        const match = this.line.match(reg);
-        if (match !== null) {
-            if (result !== undefined) {
-                this.result.push(result);
-            } else {
-                this.result.push(match[0]);
+    private matchLocationOrFunction(): boolean {
+        // (-1) is only ever a register location, whereas
+        // '1' could be a jump address or a operand.
+        const minusOneMatch = this.line.match(/^(-1|\(\s*-1\s*\))/);
+        if (minusOneMatch !== null) {
+            this.result.push({
+                type: 'LOCATION',
+                location: 'MINUS_ONE',
+                readable: true,
+                writable: false,
+            });
+            this.advance(minusOneMatch[0].length);
+            return true;
+        }
+        const matchWord = this.line.match(/^(\w+\d*)/);
+        if (matchWord !== null) {
+            const match = matchWord[0];
+            if (isLocation(match)) {
+                this.result.push({
+                    type: 'LOCATION',
+                    location: match,
+                    readable: isReadable(match),
+                    writable: isWritable(match),
+                });
+                this.advance(matchWord[0].length);
+                return true;
+            } else if (match === 'rsh' || match === 'lsh') {
+                this.result.push({ type: 'FUNCTION', name: match });
+                this.advance(matchWord[0].length);
+                return true;
             }
-            this.line = this.line.slice(match[0].length);
+        }
+        return false;
+    }
+
+    private matchExact(value: string, result: Token): boolean {
+        if (this.line.startsWith(value)) {
+            this.result.push(result);
+            this.line = this.line.slice(value.length);
             return true;
         }
         return false;
     }
 
-    public lex(): Result<string[]> {
-        loop: while (this.line.length > 0) {
+    public lex(): Result<Token[]> {
+        while (this.line.length > 0) {
             let matched =
                 this.ignoreWhitespace() ||
-                this.matchRegex(/^(-1|\(\s*-1\s*\))/, 'MINUS_ONE') ||
-                this.matchOne('0', 'ZERO') ||
-                this.matchOne('1', 'ONE') ||
-                this.matchOne('(') ||
-                this.matchOne(')') ||
-                this.matchRegex(/^(<-)/) ||
-                this.matchRegex(/^(\+|-|&)/) ||
-                this.matchRegex(/^(\w+\d*)/);
+                this.matchLocationOrFunction() ||
+                this.matchPositiveNumber() ||
+                this.matchExact('wr', {
+                    type: 'READ_WRITE',
+                    readWrite: 'wr',
+                }) ||
+                this.matchExact('rd', {
+                    type: 'READ_WRITE',
+                    readWrite: 'rd',
+                }) ||
+                this.matchExact('(', { type: 'L_PAREN' }) ||
+                this.matchExact(')', { type: 'R_PAREN' }) ||
+                this.matchExact('<-', { type: 'ARROW' }) ||
+                this.matchExact('goto', { type: 'GOTO' }) ||
+                this.matchExact('if', { type: 'IF' }) ||
+                this.matchExact('N', { type: 'CONDITION', condition: 'N' }) ||
+                this.matchExact('Z', { type: 'CONDITION', condition: 'Z' }) ||
+                this.matchOperator();
             if (!matched) {
                 return Err(`Invalid from: ${this.line}`);
             }
         }
         return Ok(this.result);
     }
-}
-
-export function lex(line: string): Result<string[]> {
-    const lexer = new Lexer(line);
-    return lexer.lex();
 }

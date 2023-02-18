@@ -29,10 +29,10 @@ const READ_ONLY_BUFFER = 'MBR';
 export type Constant = keyof typeof CONSTANT_REGISTERS;
 export type Register = keyof typeof REGISTERS;
 export type RegisterOrConstant = Register | Constant;
-export type MemoryBuffer = typeof BUFFERS[number];
+export type MemoryBuffer = 'MAR' | 'MBR';
 export type WriteOnlyBuffer = typeof WRITE_ONLY_BUFFER;
 export type ReadOnlyBuffer = typeof READ_ONLY_BUFFER;
-export type RefisterOrMemoryBurffer = Register | MemoryBuffer;
+export type RegisterOrMemoryBuffer = Register | MemoryBuffer;
 export type Writable = Register | MemoryBuffer;
 export type Readable = Register | Constant | ReadOnlyBuffer;
 export type Location = Register | Constant | MemoryBuffer;
@@ -52,7 +52,7 @@ export function isWritable(name?: string): name is Writable {
     if (name === undefined) {
         return false;
     }
-    return name in REGISTERS || name === WRITE_ONLY_BUFFER;
+    return name in REGISTERS || BUFFERS.some((b) => b === name);
 }
 
 export function isReadable(name?: string): name is Readable {

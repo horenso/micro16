@@ -1,15 +1,62 @@
-import { Readable, Writable } from '../registers';
+import { Location, Readable, Writable } from '../registers';
 
-export type Shift = 'left' | 'right';
-const OPERATOR: readonly string[] = ['+', '&', '~'] as const;
+const OPERATOR = ['+', '&', '~'] as const;
 export type Operator = typeof OPERATOR[number];
-
 export function isOperator(str?: string): str is Operator {
     if (str === undefined) {
         return false;
     }
-    return OPERATOR.includes(str);
+    return OPERATOR.some((a) => a === str);
 }
+
+interface SimpleToken {
+    type: 'GOTO' | 'IF' | 'L_PAREN' | 'R_PAREN' | 'ARROW';
+}
+
+interface NumberToken {
+    type: 'NUMBER';
+    number: number;
+}
+
+interface LocationToken {
+    type: 'LOCATION';
+    location: Location;
+    readable: boolean;
+    writable: boolean;
+}
+
+export interface ReadWriteToken {
+    type: 'READ_WRITE';
+    readWrite: 'rd' | 'wr';
+}
+
+interface ConditionToken {
+    type: 'CONDITION';
+    condition: 'N' | 'Z';
+}
+
+interface FunctionToken {
+    type: 'FUNCTION';
+    name: 'lsh' | 'rsh';
+}
+
+interface OperatorToken {
+    type: 'OPERATOR';
+    operator: Operator;
+}
+
+export type Token =
+    | SimpleToken
+    | NumberToken
+    | LocationToken
+    | ReadWriteToken
+    | ConditionToken
+    | FunctionToken
+    | OperatorToken;
+
+const token: Token = { type: 'OPERATOR', operator: '+' };
+
+export type Shift = 'left' | 'right';
 
 interface NoOp {
     left: Readable;

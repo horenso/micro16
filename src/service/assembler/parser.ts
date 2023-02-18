@@ -1,5 +1,4 @@
-import { isLocation, isReadable, isWritable } from '../registers';
-
+import { isReadable, Writable, Readable } from '../registers';
 import {
     Err,
     Expression,
@@ -8,9 +7,11 @@ import {
     Ok,
     Operation,
     ParsedInstruction,
+    ReadWriteToken,
     Result,
     Shift,
     Statement,
+    Token,
 } from './types';
 import { lex } from './lexer';
 
@@ -25,8 +26,8 @@ export function parseLine(line: string): Result<ParsedInstruction> {
 }
 
 class Parser {
-    tokens: string[];
-    current_token?: string;
+    tokens: Token[];
+    current_token?: Token;
 
     seenReadWrite = false;
     seenGoto = false;
@@ -35,27 +36,27 @@ class Parser {
         statements: [],
     };
 
-    error: Error | undefined;
-
-    constructor(tokens: string[]) {
+    constructor(tokens: Token[]) {
         this.tokens = tokens;
         this.current_token = this.nextToken();
     }
 
-    private peekToken(): string | undefined {
+    private peekToken(): Token | undefined {
         return this.tokens[0];
     }
 
-    private nextToken(): string | undefined {
+    private nextToken(): Token | undefined {
         return this.tokens.shift();
     }
 
-    private parseReadWrite(current_token: 'rd' | 'wr'): Result<{}> {
+    private parseReadWrite(): Result<{}> {
         if (this.seenReadWrite) {
             return Err('Only one read/write permitted');
         }
         this.seenReadWrite = true;
-        this.result.readWrite = current_token;
+        this.result.readWrite = (
+            this.current_token as ReadWriteToken
+        ).readWrite;
         this.current_token = this.nextToken();
         return Ok({});
     }
@@ -66,22 +67,22 @@ class Parser {
         }
         this.seenGoto = true;
         let condition: 'N' | 'Z' | undefined;
-        if (this.current_token === 'if') {
+        if (this.current_token?.type === 'IF') {
             this.current_token = this.nextToken();
-            if (this.current_token !== 'N' && this.current_token !== 'Z') {
+            if (this.current_token?.type !== 'CONDITION') {
                 return Err('Invalid jump statement!');
             }
-            condition = this.current_token;
+            condition = this.current_token.condition;
             this.current_token = this.nextToken();
         }
-        if (this.current_token !== 'goto') {
+        if (this.current_token?.type !== 'GOTO') {
             return Err('Invalid jump statement!');
         }
         this.current_token = this.nextToken();
-        if (this.current_token === undefined) {
+        if (this.current_token?.type !== 'NUMBER') {
             return Err('Invalid jump statement!');
         }
-        const jumpAddress = parseInt(this.current_token);
+        const jumpAddress = this.current_token.number;
         if (jumpAddress < 0 || jumpAddress > 255) {
             return Err('Jump address must be between 0 and 255.');
         }
@@ -93,41 +94,44 @@ class Parser {
     // or left operator right. It's what can go
     // into a shift expression.
     private parseOperation(): Result<Operation> {
-        const left = this.current_token;
+        const leftToken = this.current_token;
+        if (leftToken?.type !== 'LOCATION') {
+            return Err('Invalid instruction.');
+        }
+        const left = leftToken.location;
         if (!isReadable(left)) {
             return Err(`${left} is not readable!`);
         }
         this.current_token = this.nextToken();
-        const operator = this.current_token;
-        if (!isOperator(operator)) {
+        if (this.current_token?.type !== 'OPERATOR') {
             // There is no operation, return early here.
             return Ok({ left: left });
         }
+        const operator = this.current_token.operator;
         this.current_token = this.nextToken();
-        const right = this.current_token;
-        if (!isReadable(right)) {
-            return Err(`${right} is not readable!`);
+        const rightToken = this.current_token;
+        if (rightToken?.type !== 'LOCATION') {
+            return Err('Expected location after operator.');
+        }
+        if (!rightToken.readable) {
+            return Err(`${rightToken.location} is not readable!`);
         }
         this.current_token = this.nextToken();
-        return Ok({ left: left, right: right, operator: operator });
+        return Ok({
+            left: left,
+            right: rightToken.location as Readable,
+            operator: operator,
+        });
     }
 
     // An expression can be on the right of '<-'.
     private parseExpression(): Result<Expression> {
         let shift: Shift | undefined;
-        switch (this.current_token) {
-            case 'lsh':
-                shift = 'left';
-                break;
-            case 'rsh':
-                shift = 'right';
-                break;
-        }
         let operationResult: Result<Operation>;
-        if (shift !== undefined) {
-            // Skip lsh or rsh
+        if (this.current_token?.type === 'FUNCTION') {
+            shift = this.current_token.name === 'lsh' ? 'left' : 'right';
             this.current_token = this.nextToken();
-            if (this.current_token != '(') {
+            if (this.current_token?.type !== 'L_PAREN') {
                 return Err('Invalid statement.');
             }
             operationResult = this.parseOperation();
@@ -135,7 +139,7 @@ class Parser {
                 return operationResult;
             }
             this.current_token = this.nextToken();
-            if (this.current_token != ')') {
+            if (this.current_token?.type !== 'R_PAREN') {
                 return Err('Invalid statement.');
             }
         } else {
@@ -148,21 +152,21 @@ class Parser {
     }
 
     private parseStatement(): Result<Statement> {
-        // It could start with a location or a call to lsh/rsh.
-        if (!isLocation(this.current_token)) {
-            // If the statement doesn't start with a location it must be a lsh/rsh.
+        if (this.current_token?.type !== 'LOCATION') {
+            // If the statement doesn't start with a location it must
+            // be a an expression (starting with lsh/rsh).
             return this.parseExpression();
         }
-        const location = this.current_token;
+        const locationToken = this.current_token;
         const peekedToken = this.peekToken();
-        if (peekedToken !== '<-') {
+        if (peekedToken?.type !== 'ARROW') {
             // The location is just the left hand side of an operation.
             return this.parseExpression();
         }
         // Now that we know that location is the left-hand side
         // of an assignment we can narrow it down to Writable.
-        if (!isWritable(location)) {
-            return Err(`${location} is not writable!`);
+        if (!locationToken.writable) {
+            return Err(`${locationToken.location} is not writable!`);
         }
         this.nextToken(); // Skip '<-'
         this.current_token = this.nextToken();
@@ -170,20 +174,25 @@ class Parser {
         if (!expressionResult.ok) {
             return expressionResult;
         }
-        return Ok({ ...expressionResult.result, dest: location });
+        return Ok({
+            ...expressionResult.result,
+            dest: locationToken.location as Writable,
+        });
     }
 
     public parse(): Result<ParsedInstruction> {
-        while (this.current_token !== undefined && this.error === undefined) {
-            if (this.current_token === 'goto' || this.current_token === 'if') {
-                const jump = this.parseJump();
-                if (!jump.ok) return jump;
-                this.result.jump = jump.result;
-            } else if (
-                this.current_token === 'rd' ||
-                this.current_token === 'wr'
+        while (this.current_token !== undefined) {
+            if (
+                this.current_token.type === 'GOTO' ||
+                this.current_token.type === 'IF'
             ) {
-                const readWriteResult = this.parseReadWrite(this.current_token);
+                const jump = this.parseJump();
+                if (!jump.ok) {
+                    return jump;
+                }
+                this.result.jump = jump.result;
+            } else if (this.current_token.type === 'READ_WRITE') {
+                const readWriteResult = this.parseReadWrite();
                 if (!readWriteResult.ok) return readWriteResult;
             } else {
                 const statement = this.parseStatement();
