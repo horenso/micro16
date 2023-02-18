@@ -3,7 +3,7 @@ import { expect, test } from 'vitest';
 import { lex } from './lexer';
 
 test('Basic addition of two registers.', () => {
-    const input = 'R1 <- R2 + R3';
+    const input = 'R1 <- R2 + R3; rd';
     const expected = Ok([
         {
             type: 'LOCATION',
@@ -24,6 +24,10 @@ test('Basic addition of two registers.', () => {
             location: 'R3',
             readable: true,
             writable: true,
+        },
+        {
+            type: 'READ_WRITE',
+            readWrite: 'rd',
         },
     ]);
     expect(lex(input)).toMatchObject(expected);
@@ -73,7 +77,7 @@ test('Parentheses with shift.', () => {
 
 test('1 vs ONE 0 vs ZERO', () => {
     // NOTE: This is just a lexer test, this wouldn't be a valid instruction.
-    const input = 'R1 <- 0 + 1; goto 0; if N goto 1; R1 <- 1';
+    const input = 'R1 <- 0 + 1; goto 0; if N goto 1; R1 <- 1; wr';
     const expected: Result<Token[]> = Ok([
         {
             type: 'LOCATION',
@@ -113,6 +117,10 @@ test('1 vs ONE 0 vs ZERO', () => {
             location: 'ONE',
             readable: true,
             writable: false,
+        },
+        {
+            type: 'READ_WRITE',
+            readWrite: 'wr',
         },
     ]);
     expect(lex(input)).toMatchObject(expected);
