@@ -45,6 +45,11 @@ class Lexer {
             (match === '0' || match === '1') &&
             previousToken?.type === 'GOTO'
         ) {
+            this.result.push({
+                type: 'NUMBER',
+                number: parseInt(match, 10),
+            });
+        } else {
             if (match === '0') {
                 this.result.push({
                     type: 'LOCATION',
@@ -60,15 +65,9 @@ class Lexer {
                     writable: false,
                 });
             }
-        } else {
-            this.result.push({
-                type: 'NUMBER',
-                number: parseInt(numberMatch[0], 10),
-            });
         }
-
-        this.advance(numberMatch[0].length);
-        return false;
+        this.advance(match.length);
+        return true;
     }
 
     private matchOperator(): boolean {
