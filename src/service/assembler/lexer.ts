@@ -5,41 +5,58 @@ class Lexer {
 
     constructor(private line: string) {}
 
+    private ignoreWhitespace(): boolean {
+        const whitespacesMatch = this.line.match(/^(\s|;+)/);
+        // Ignore whitespaces and semicolons
+        if (whitespacesMatch !== null) {
+            this.line = this.line.slice(whitespacesMatch[0].length);
+            return true;
+        }
+        return false;
+    }
+
+    private matchOne(char: string, result?: string): boolean {
+        if (this.line.startsWith(char)) {
+            if (result !== undefined) {
+                this.result.push(result);
+            } else {
+                this.result.push(char);
+            }
+            this.line = this.line.slice(1);
+            return true;
+        }
+        return false;
+    }
+
+    private matchRegex(reg: RegExp, result?: string): boolean {
+        const match = this.line.match(reg);
+        if (match !== null) {
+            if (result !== undefined) {
+                this.result.push(result);
+            } else {
+                this.result.push(match[0]);
+            }
+            this.line = this.line.slice(match[0].length);
+            return true;
+        }
+        return false;
+    }
+
     public lex(): Result<string[]> {
-        loop: for (let i = 0; i < this.line.length; ) {
-            const rest = this.line.slice(i);
-            const whitespacesMatch = rest.match(/\s|;+/);
-            // Ignore whitespaces and semicolons
-            if (whitespacesMatch !== null) {
-                i += whitespacesMatch[0].length;
-                continue;
+        loop: while (this.line.length > 0) {
+            let matched =
+                this.ignoreWhitespace() ||
+                this.matchRegex(/^(-1|\(\s*-1\s*\))/, 'MINUS_ONE') ||
+                this.matchOne('0', 'ZERO') ||
+                this.matchOne('1', 'ONE') ||
+                this.matchOne('(') ||
+                this.matchOne(')') ||
+                this.matchRegex(/^(<-)/) ||
+                this.matchRegex(/^(\+|-|&)/) ||
+                this.matchRegex(/^(\w+\d*)/);
+            if (!matched) {
+                return Err(`Invalid from: ${this.line}`);
             }
-            if (rest.match(/-1|\(-1\)/)) {
-                this.result.push('MINUS_ONE');
-                ++i;
-                continue;
-            }
-            if (rest.startsWith('0')) {
-                this.result.push('ZERO');
-                ++i;
-                continue;
-            }
-            if (rest.startsWith('1')) {
-                this.result.push('ONE');
-                ++i;
-                continue;
-            }
-            if (rest.startsWith('(') || rest.startsWith(')')) {
-                this.result.push(rest[0]);
-                ++i;
-                continue;
-            }
-            const locationMatch = rest.match(/\w+\d*/);
-            if (locationMatch !== null) {
-                i += locationMatch[0].length;
-                continue;
-            }
-            return Err(`Invalid line: ${rest}`);
         }
         return Ok(this.result);
     }
