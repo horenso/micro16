@@ -12,8 +12,8 @@ start: build-base
 host: build-full \
 	docker run \
 		--rm \
-		--network=npm-network
-		micro16-app-prod .
+		--network=npm-network \
+		micro16-app-full .
 
 test: build-test
 	docker run \
