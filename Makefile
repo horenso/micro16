@@ -9,6 +9,12 @@ start: build-base
 		--rm \
 		micro16-app-base
 
+host: build-full \
+	docker run \
+		--rm \
+		--network=npm-network
+		micro16-app-prod .
+
 test: build-test
 	docker run \
 		--interactive --tty \
