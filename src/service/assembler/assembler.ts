@@ -42,16 +42,25 @@ export class Assembler {
     }
 
     private assembleStatements(): EmptyResult {
-        // Sort statements such that assignments to MAR come first.
+        // Sort statements:
+        // First statements that contain MBR as one operand,
+        // then assignments to MAR.
         this.instruction.statements.sort((a, b) => {
-            if (a.dest === 'MAR' && b.dest === 'MAR') {
-                return 0;
-            } else if (a.dest === 'MAR') {
+            if (a.left === 'MBR' || a.right === 'MBR') {
                 return -1;
-            } else {
+            }
+            if (b.left === 'MBR' || b.right === 'MBR') {
                 return 1;
             }
+            if (a.dest === 'MAR') {
+                return -1;
+            }
+            if (b.dest === 'MAR') {
+                return 1;
+            }
+            return 0;
         });
+        console.table(this.instruction.statements);
 
         for (let stmt of this.instruction.statements) {
             this.useOperator(stmt.operator);
