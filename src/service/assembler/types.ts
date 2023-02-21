@@ -54,8 +54,6 @@ export type Token =
     | FunctionToken
     | OperatorToken;
 
-const token: Token = { type: 'OPERATOR', operator: '+' };
-
 export type Shift = 'left' | 'right';
 
 interface NoOp {
@@ -91,10 +89,20 @@ export type Result<T> =
     | { ok: true; result: T }
     | { ok: false; errorMessage: string };
 
+export type EmptyResult = { ok: true } | { ok: false; errorMessage: string };
+
 export function Ok<T>(result: T): Result<T> {
     return { ok: true, result: result };
 }
 
 export function Err<T>(message: string): Result<T> {
+    return { ok: false, errorMessage: message };
+}
+
+export function EmptyOk(): EmptyResult {
+    return { ok: true };
+}
+
+export function EmptyErr(message: string): EmptyResult {
     return { ok: false, errorMessage: message };
 }

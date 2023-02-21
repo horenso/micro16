@@ -73,6 +73,13 @@ export function isRegister(name?: string): name is Register {
     return name in REGISTERS;
 }
 
+export function isConstant(name?: string): name is Constant {
+    if (name === undefined) {
+        return false;
+    }
+    return name in CONSTANT_REGISTERS;
+}
+
 export function isMemoryBuffer(name?: string): name is MemoryBuffer {
     if (name === undefined) {
         return false;
@@ -80,35 +87,10 @@ export function isMemoryBuffer(name?: string): name is MemoryBuffer {
     return name in BUFFERS;
 }
 
-type ConstantString = '0' | '1' | '-1';
-
-export function isCOnstantRegister(
-    name: string | undefined
-): name is ConstantString {
-    if (name === undefined) {
-        return false;
+export function getRegisterIndex(name: Register | Constant): number {
+    if (isRegister(name)) {
+        return REGISTERS[name];
+    } else {
+        return CONSTANT_REGISTERS[name];
     }
-    switch (name) {
-        case '0':
-        case '1':
-        case '-1':
-            return true;
-        default:
-            return false;
-    }
-}
-
-export function toConstantRegister(name: ConstantString): Constant {
-    switch (name) {
-        case '0':
-            return 'ZERO';
-        case '1':
-            return 'ONE';
-        case '-1':
-            return 'MINUS_ONE';
-    }
-}
-
-export function getRegisterIndex(name: Register): number {
-    return REGISTERS[name];
 }

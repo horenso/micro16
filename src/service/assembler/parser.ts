@@ -20,7 +20,6 @@ export function parseLine(line: string): Result<ParsedInstruction> {
     if (!lexResult.ok) {
         return lexResult;
     }
-    console.log('Tokens where:', lexResult.result);
     const parser = new Parser(lexResult.result);
     return parser.parse();
 }

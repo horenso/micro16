@@ -18,7 +18,6 @@ host: build-full \
 test: build-test
 	docker run \
 		--interactive --tty \
-		--publish 5000:5000 \
 		--volume ${PWD}:/app \
 		--rm \
 		micro16-app-test
