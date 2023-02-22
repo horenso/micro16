@@ -1,4 +1,4 @@
-import { Location, Readable, Writable } from '../registers';
+import { Location, Readable, RegisterOrConstant, Writable } from '../registers';
 
 const OPERATOR = ['+', '&', '~'] as const;
 export type Operator = typeof OPERATOR[number];
@@ -79,8 +79,22 @@ export interface Jump {
     toAddress: number;
 }
 
+// This represents the structure of an Instruction how it is parsed by the parser.
 export interface ParsedInstruction {
     statements: Statement[];
+    jump?: Jump;
+    readWrite?: 'rd' | 'wr';
+}
+
+// An AnalysedInstruction has already assigned all the buses and mar/mbr/a-mux flags.
+export interface AnalysedInstruction {
+    busA: RegisterOrConstant;
+    busB: RegisterOrConstant;
+    busS: RegisterOrConstant;
+    operator?: Operator;
+    marFlag: boolean;
+    mbrFlag: boolean;
+    aMuxFlag: boolean;
     jump?: Jump;
     readWrite?: 'rd' | 'wr';
 }
@@ -95,14 +109,10 @@ export function Ok<T>(result: T): Result<T> {
     return { ok: true, result: result };
 }
 
-export function Err<T>(message: string): Result<T> {
-    return { ok: false, errorMessage: message };
-}
-
 export function EmptyOk(): EmptyResult {
     return { ok: true };
 }
 
-export function EmptyErr(message: string): EmptyResult {
+export function Err<T>(message: string): Result<T> {
     return { ok: false, errorMessage: message };
 }

@@ -1,4 +1,4 @@
-import { parseLine } from './parser';
+import { parse } from './parser';
 import { expect, test } from 'vitest';
 import { Result, ParsedInstruction, Ok } from './types';
 
@@ -14,7 +14,7 @@ test('Simple addition', () => {
             },
         ],
     });
-    expect(parseLine(instruction)).toMatchObject(expected);
+    expect(parse(instruction)).toMatchObject(expected);
 });
 
 test('Multiple statements', () => {
@@ -35,7 +35,7 @@ test('Multiple statements', () => {
             },
         ],
     });
-    expect(parseLine(instruction)).toMatchObject(expected);
+    expect(parse(instruction)).toMatchObject(expected);
 });
 
 test('Using constants', () => {
@@ -64,5 +64,5 @@ test('Using constants', () => {
             },
         ],
     });
-    expect(parseLine(instruction)).toMatchObject(expected);
+    expect(parse(instruction)).toMatchObject(expected);
 });

@@ -87,7 +87,7 @@ export function isMemoryBuffer(name?: string): name is MemoryBuffer {
     return name in BUFFERS;
 }
 
-export function getRegisterIndex(name: Register | Constant): number {
+export function getRegisterIndex(name: RegisterOrConstant): number {
     if (isRegister(name)) {
         return REGISTERS[name];
     } else {

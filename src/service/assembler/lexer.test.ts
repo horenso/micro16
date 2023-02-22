@@ -1,4 +1,4 @@
-import { Result, Ok, Err, Token, Operator } from './types';
+import { Result, Ok, Token } from './types';
 import { expect, test } from 'vitest';
 import { lex } from './lexer';
 

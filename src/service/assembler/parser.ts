@@ -1,8 +1,9 @@
 import { isReadable, Writable, Readable } from '../registers';
 import {
+    EmptyOk,
+    EmptyResult,
     Err,
     Expression,
-    isOperator,
     Jump,
     Ok,
     Operation,
@@ -15,13 +16,8 @@ import {
 } from './types';
 import { lex } from './lexer';
 
-export function parseLine(line: string): Result<ParsedInstruction> {
-    const lexResult = lex(line);
-    if (!lexResult.ok) {
-        return lexResult;
-    }
-    const parser = new Parser(lexResult.result);
-    return parser.parse();
+export function parse(tokens: Token[]): Result<ParsedInstruction> {
+    return new Parser(tokens).parse();
 }
 
 class Parser {
@@ -48,7 +44,7 @@ class Parser {
         return this.tokens.shift();
     }
 
-    private parseReadWrite(): Result<{}> {
+    private parseReadWrite(): EmptyResult {
         if (this.seenReadWrite) {
             return Err('Only one read/write permitted');
         }
@@ -57,7 +53,7 @@ class Parser {
             this.current_token as ReadWriteToken
         ).readWrite;
         this.current_token = this.nextToken();
-        return Ok({});
+        return EmptyOk();
     }
 
     private parseJump(): Result<Jump> {
@@ -123,7 +119,6 @@ class Parser {
         });
     }
 
-    // An expression can be on the right of '<-'.
     private parseExpression(): Result<Expression> {
         let shift: Shift | undefined;
         let operationResult: Result<Operation>;

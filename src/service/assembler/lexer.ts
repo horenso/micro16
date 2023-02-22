@@ -2,8 +2,7 @@ import { isLocation, isReadable, isWritable } from '../registers';
 import { Result, Ok, Err, Token, Operator } from './types';
 
 export function lex(line: string): Result<Token[]> {
-    const lexer = new Lexer(line);
-    return lexer.lex();
+    return new Lexer(line).lex();
 }
 
 class Lexer {
