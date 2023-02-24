@@ -92,6 +92,7 @@ export interface AnalysedInstruction {
     busB: RegisterOrConstant;
     busS: RegisterOrConstant;
     operator?: Operator;
+    shift?: Shift;
     marFlag: boolean;
     mbrFlag: boolean;
     aMuxFlag: boolean;
@@ -106,13 +107,13 @@ export type Result<T> =
 export type EmptyResult = { ok: true } | { ok: false; errorMessage: string };
 
 export function Ok<T>(result: T): Result<T> {
-    return { ok: true, result: result };
+    return { ok: true, result };
 }
 
 export function EmptyOk(): EmptyResult {
     return { ok: true };
 }
 
-export function Err<T>(message: string): Result<T> {
-    return { ok: false, errorMessage: message };
+export function Err<T>(errorMessage: string): Result<T> {
+    return { ok: false, errorMessage };
 }

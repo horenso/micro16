@@ -45,6 +45,11 @@ test('Multiple registers', () => {
     testAssembleSuccess('MAR<-R6; MBR<-R8; wr; R1<-R8', 0x01b5_ac00);
 });
 
+test('Edge caes', () => {
+    // MBR can be assigned to MBR
+    testAssembleSuccess('MBR<-MBR', 0x8100_0000);
+});
+
 test('Multiplication Example', () => {
     // Multiplication example from book page 141
     testAssembleSuccess('R7 <- R7+R7', 0x0a1b_1100);

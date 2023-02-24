@@ -46,7 +46,7 @@ class Parser {
 
     private parseReadWrite(): EmptyResult {
         if (this.seenReadWrite) {
-            return Err('Only one read/write permitted');
+            return Err('Only one read/write permitted.');
         }
         this.seenReadWrite = true;
         this.result.readWrite = (
@@ -65,17 +65,17 @@ class Parser {
         if (this.current_token?.type === 'IF') {
             this.current_token = this.nextToken();
             if (this.current_token?.type !== 'CONDITION') {
-                return Err('Invalid jump statement!');
+                return Err('Invalid jump statement.');
             }
             condition = this.current_token.condition;
             this.current_token = this.nextToken();
         }
         if (this.current_token?.type !== 'GOTO') {
-            return Err('Invalid jump statement!');
+            return Err('Invalid jump statement.');
         }
         this.current_token = this.nextToken();
         if (this.current_token?.type !== 'NUMBER') {
-            return Err('Invalid jump statement!');
+            return Err('Invalid jump statement.');
         }
         const jumpAddress = this.current_token.number;
         if (jumpAddress < 0 || jumpAddress > 255) {
@@ -95,7 +95,7 @@ class Parser {
         }
         const left = leftToken.location;
         if (!isReadable(left)) {
-            return Err(`${left} is not readable!`);
+            return Err(`${left} is not readable.`);
         }
         this.current_token = this.nextToken();
         if (this.current_token?.type !== 'OPERATOR') {
@@ -109,7 +109,7 @@ class Parser {
             return Err('Expected location after operator.');
         }
         if (!rightToken.readable) {
-            return Err(`${rightToken.location} is not readable!`);
+            return Err(`${rightToken.location} is not readable.`);
         }
         this.current_token = this.nextToken();
         return Ok({
@@ -160,7 +160,7 @@ class Parser {
         // Now that we know that location is the left-hand side
         // of an assignment we can narrow it down to Writable.
         if (!locationToken.writable) {
-            return Err(`${locationToken.location} is not writable!`);
+            return Err(`${locationToken.location} is not writable.`);
         }
         this.nextToken(); // Skip '<-'
         this.current_token = this.nextToken();

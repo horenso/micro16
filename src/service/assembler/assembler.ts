@@ -30,9 +30,18 @@ export function assemble(inst: AnalysedInstruction): number {
         result |= 0x1000_0000;
     }
 
+    if (inst.shift === 'left') {
+        result |= 0x0400_0000;
+    } else if (inst.shift === 'right') {
+        result |= 0x0200_0000;
+    }
+
     result |= getRegisterIndex(inst.busA) << 8;
     result |= getRegisterIndex(inst.busB) << 12;
     result |= getRegisterIndex(inst.busS) << 16;
+    if (inst.busS !== 'ZERO') {
+        result |= 0x0010_0000; // ENS
+    }
 
     if (inst.marFlag) {
         result |= 0x0080_0000;

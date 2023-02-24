@@ -147,7 +147,7 @@ class Lexer {
                 this.matchExact('Z', { type: 'CONDITION', condition: 'Z' }) ||
                 this.matchOperator();
             if (!matched) {
-                return Err(`Invalid from: ${this.line}`);
+                return Err(`Invalid from: ${this.line}.`);
             }
         }
         return Ok(this.result);
