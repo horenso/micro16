@@ -36,8 +36,8 @@ test('Calculations', () => {
     testAssembleSuccess('R0 <- R1 + R2', 0x0814_6500);
     testAssembleSuccess('R0 <- lsh(R1 + R2)', 0x0a146500);
     testAssembleSuccess('R0 <- rsh(R1 + R2)', 0x0c14_6500);
-    testAssembleSuccess('R1 <- 1 + (-1)', 0x08152100);
-    testAssemblingError('R1 <- 1 + -1');
+    testAssembleSuccess('R1 <- 1 + (-1)', 0x0815_2100);
+    testAssembleSuccess('R1 <- 1 + -1', 0x0815_2100);
     testAssembleSuccess('R1 <- ~ (-1)', 0x1815_0200);
 });
 

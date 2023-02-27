@@ -118,13 +118,6 @@ export class Analyser {
             if (!result.ok) return result;
         }
 
-        if (
-            stmt.dest !== undefined &&
-            this.busS !== undefined &&
-            this.busS !== stmt.dest
-        ) {
-            return Err(`Bus S is already busy with ${this.busS}.`);
-        }
         if (stmt.left === 'MBR') {
             if (stmt.right === 'MBR') {
                 return Err('Only one operand can be MBR.');
@@ -137,6 +130,19 @@ export class Analyser {
             }
             this.busB = stmt.left;
         }
+        return EmptyOk();
+    }
+
+    // No operand, only a left-hand side.
+    private handlePassThroughStatement(stmt: Statement): EmptyResult {
+        if (stmt.dest === 'MBR') {
+            this.mbr = true;
+        } else {
+            let result = this.setBus('busS', stmt.dest as RegisterOrConstant);
+            if (!result.ok) return result;
+        }
+        let result = this.setBus('busA', stmt.left as RegisterOrConstant);
+        if (!result.ok) return result;
         return EmptyOk();
     }
 
@@ -198,6 +204,9 @@ export class Analyser {
                 if (!result.ok) return result;
             } else if (stmt.left === 'MBR' || stmt.right === 'MBR') {
                 result = this.handleStatementOperandMBR(stmt);
+                if (!result.ok) return result;
+            } else if (stmt.operator === undefined) {
+                result = this.handlePassThroughStatement(stmt);
                 if (!result.ok) return result;
             } else {
                 result = this.handleOtherStatement(stmt);
