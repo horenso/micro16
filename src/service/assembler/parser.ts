@@ -181,6 +181,9 @@ class Parser {
         }
     }
 
+    // A statement can be:
+    // - An assignment like "R1 <- <expression>"
+    // - Just an expression: "<expression>"
     private parseStatement(): Result<Statement> {
         let locationToken = this.peekToken();
         if (locationToken?.type !== 'LOCATION') {
