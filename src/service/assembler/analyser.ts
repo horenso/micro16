@@ -63,6 +63,9 @@ export class Analyser {
         if (value === undefined) {
             return EmptyOk();
         }
+        if (bus === 'busA' && this.aMux) {
+            return Err('Bus A cannot be used since AMUX is set.');
+        }
         if (this[bus] !== undefined && this[bus] != value) {
             return Err(
                 `Bus ${bus[bus.length - 1]} is already busy with ${this[bus]}.`
@@ -92,48 +95,59 @@ export class Analyser {
         });
     }
 
-    private handleStatementDestMAR(statement: Statement): EmptyResult {
-        if (statement.right !== undefined) {
+    private handleStatementDestMAR(stmt: Statement): EmptyResult {
+        if (stmt.left === 'MBR' || stmt.right === 'MBR') {
+            return Err('MBR cannot be used as input for MAR.');
+        }
+        if (stmt.right !== undefined) {
             return Err('MAR with binary operation.');
         }
-        if (this.busB !== undefined && this.busB !== statement.left) {
+        if (this.busB !== undefined && this.busB !== stmt.left) {
             return Err(`Bus B is already busy with ${this.busB}.`);
         }
-        this.busB = statement.left as RegisterOrConstant;
+        this.busB = stmt.left as RegisterOrConstant;
         this.mar = true;
         return EmptyOk();
     }
 
-    private handleStatementOperandMBR(statement: Statement): EmptyResult {
-        if (statement.dest !== undefined) {
-            if (this.busS !== undefined && this.busS !== statement.dest) {
-                return Err(`Bus S is already busy with ${this.busS}.`);
-            }
-        }
-        if (statement.left === 'MBR') {
-            if (statement.right === 'MBR') {
-                return Err('MBR cannot be used with both operands.');
-            }
-            this.setBus('busB', statement.right);
-            if (statement.right !== undefined) {
-                if (this.busB !== undefined && this.busB !== statement.right) {
-                    return Err(`Bus B is already busy with ${this.busB}.`);
-                }
-                this.busB = statement.right;
-            }
+    private handleStatementOperandMBR(stmt: Statement): EmptyResult {
+        if (stmt.dest === 'MBR') {
+            this.mbr = true;
         } else {
-            if (this.busB !== undefined && this.busB !== statement.left) {
+            let result = this.setBus('busS', stmt.dest as RegisterOrConstant);
+            if (!result.ok) return result;
+        }
+
+        if (
+            stmt.dest !== undefined &&
+            this.busS !== undefined &&
+            this.busS !== stmt.dest
+        ) {
+            return Err(`Bus S is already busy with ${this.busS}.`);
+        }
+        if (stmt.left === 'MBR') {
+            if (stmt.right === 'MBR') {
+                return Err('Only one operand can be MBR.');
+            }
+            this.setBus('busB', stmt.right);
+            this.aMux = true;
+        } else {
+            if (this.busB !== undefined && this.busB !== stmt.left) {
                 return Err(`Bus B is already busy with ${this.busB}.`);
             }
-            this.busB = statement.left;
+            this.busB = stmt.left;
         }
         return EmptyOk();
     }
 
     // Any statement that doesn't have dest=MAR or MBR as one of its operands.
     private handleOtherStatement(stmt: Statement): EmptyResult {
-        let result = this.setBus('busS', stmt.dest as RegisterOrConstant);
-        if (!result.ok) return result;
+        if (stmt.dest === 'MBR') {
+            this.mbr = true;
+        } else {
+            let result = this.setBus('busS', stmt.dest as RegisterOrConstant);
+            if (!result.ok) return result;
+        }
 
         // Assign left to either busA or busB
         let leftBus: 'busA' | 'busB';
@@ -207,6 +221,7 @@ export class Analyser {
             busB: this.busB !== undefined ? this.busB : 'ZERO',
             busS: this.busS !== undefined ? this.busS : 'ZERO',
             operator: this.operator,
+            shift: this.shift,
             marFlag: this.mar,
             mbrFlag: this.mbr,
             aMuxFlag: this.aMux,

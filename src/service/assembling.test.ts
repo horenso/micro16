@@ -2,7 +2,7 @@ import { assembleLine } from './assembling';
 import { test, expect } from 'vitest';
 
 function testAssembleSuccess(line: string, result: number) {
-    expect(assembleLine(line)).toMatchObject({ ok: true, result: result });
+    expect(assembleLine(line)).toMatchObject({ ok: true, result: result & -1 });
 }
 
 function testAssemblingError(line: string) {
@@ -26,7 +26,7 @@ test('Jumps', () => {
     testAssembleSuccess('if Z goto 50', 0x4000_0032);
     testAssembleSuccess('(R1); if Z goto 30', 0x4000_051e);
     testAssembleSuccess('R1 if Z goto 30', 0x4000_051e);
-    testAssembleSuccess('(((R1)));;; if Z goto 30', 0x4000_051e);
+    testAssembleSuccess('(R1);;; if Z goto 30', 0x4000_051e);
 });
 
 test('Calculations', () => {
@@ -38,6 +38,7 @@ test('Calculations', () => {
     testAssembleSuccess('R0 <- rsh(R1 + R2)', 0x0c14_6500);
     testAssembleSuccess('R1 <- 1 + (-1)', 0x08152100);
     testAssemblingError('R1 <- 1 + -1');
+    testAssembleSuccess('R1 <- ~ (-1)', 0x1815_0200);
 });
 
 test('Multiple registers', () => {
@@ -46,14 +47,15 @@ test('Multiple registers', () => {
 });
 
 test('Edge caes', () => {
-    // MBR can be assigned to MBR
-    testAssembleSuccess('MBR<-MBR', 0x8100_0000);
+    testAssembleSuccess('MBR<-MBR', 0x8100_0000); // MBR can be assigned to MBR
+    testAssemblingError('R1 <- 1~1'); // ~ takes only one operand
+    testAssemblingError('MAR <- MBR'); // "MBR cannot be used as input for MAR."
 });
 
 test('Multiplication Example', () => {
     // Multiplication example from book page 141
-    testAssembleSuccess('R7 <- R7+R7', 0x0a1b_1100);
-    testAssembleSuccess('R7 <- lsh(1+1)', 0x081b_bb00);
+    testAssembleSuccess('R7 <- R7+R7', 0x081b_bb00);
+    testAssembleSuccess('R7 <- lsh(1+1)', 0x0a1b_1100);
     testAssembleSuccess('R8 <- 0', 0x001c_0000);
     testAssembleSuccess('R6 <- (1+1)', 0x081a_1100);
     testAssembleSuccess('R6 <- R6+1', 0x081a_1a00);

@@ -1,0 +1,7 @@
+goto -1 => ff
+goto -2 => fe ?
+goto -257 => ff
+
+
+-) unary operator ~ comes before location!
+-) Remove readable/writable from LocationToken

@@ -13,16 +13,9 @@ interface SimpleToken {
     type: 'GOTO' | 'IF' | 'L_PAREN' | 'R_PAREN' | 'ARROW';
 }
 
-interface NumberToken {
-    type: 'NUMBER';
-    number: number;
-}
-
 interface LocationToken {
     type: 'LOCATION';
     location: Location;
-    readable: boolean;
-    writable: boolean;
 }
 
 export interface ReadWriteToken {
@@ -40,35 +33,52 @@ interface FunctionToken {
     name: 'lsh' | 'rsh';
 }
 
-interface OperatorToken {
-    type: 'OPERATOR';
-    operator: Operator;
+interface UnaryOperatorToken {
+    type: 'UNARY_OPERATOR';
+    operator: '~';
+}
+
+interface BinaryOperatorToken {
+    type: 'BINARY_OPERATOR';
+    operator: '+' | '&';
+}
+
+interface JumpAddressToken {
+    type: 'JUMP_ADDRESS';
+    number: number;
 }
 
 export type Token =
     | SimpleToken
-    | NumberToken
     | LocationToken
     | ReadWriteToken
     | ConditionToken
     | FunctionToken
-    | OperatorToken;
+    | UnaryOperatorToken
+    | BinaryOperatorToken
+    | JumpAddressToken;
 
-export type Shift = 'left' | 'right';
+export type Shift = 'lsh' | 'rsh';
 
-interface NoOp {
+interface NoOperation {
     left: Readable;
     operator?: never;
     right?: never;
 }
 
-interface Op {
+interface UnaryOperation {
     left: Readable;
-    operator: Operator;
+    operator: '~';
+    right?: never;
+}
+
+interface BinaryOperation {
+    left: Readable;
+    operator: '+' | '&';
     right: Readable;
 }
 
-export type Operation = NoOp | Op;
+export type Operation = NoOperation | UnaryOperation | BinaryOperation;
 
 export type Expression = Operation & { shift?: Shift };
 

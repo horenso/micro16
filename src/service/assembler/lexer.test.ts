@@ -4,26 +4,20 @@ import { lex } from './lexer';
 
 test('Basic addition of two registers.', () => {
     const input = 'R1 <- R2 + R3; rd';
-    const expected = Ok([
+    const expected: Result<Token[]> = Ok([
         {
             type: 'LOCATION',
             location: 'R1',
-            readable: true,
-            writable: true,
         },
         { type: 'ARROW' },
         {
             type: 'LOCATION',
             location: 'R2',
-            readable: true,
-            writable: true,
         },
-        { type: 'OPERATOR', operator: '+' },
+        { type: 'BINARY_OPERATOR', operator: '+' },
         {
             type: 'LOCATION',
             location: 'R3',
-            readable: true,
-            writable: true,
         },
         {
             type: 'READ_WRITE',
@@ -35,12 +29,10 @@ test('Basic addition of two registers.', () => {
 
 test('Parentheses with shift.', () => {
     const input = 'R1 <- lsh(1+(-1))';
-    const expected = Ok([
+    const expected: Result<Token[]> = Ok([
         {
             type: 'LOCATION',
             location: 'R1',
-            readable: true,
-            writable: true,
         },
         {
             type: 'ARROW',
@@ -55,18 +47,14 @@ test('Parentheses with shift.', () => {
         {
             type: 'LOCATION',
             location: 'ONE',
-            readable: true,
-            writable: false,
         },
         {
-            type: 'OPERATOR',
+            type: 'BINARY_OPERATOR',
             operator: '+',
         },
         {
             type: 'LOCATION',
             location: 'MINUS_ONE',
-            readable: true,
-            writable: false,
         },
         {
             type: 'R_PAREN',
@@ -82,41 +70,31 @@ test('1 vs ONE 0 vs ZERO', () => {
         {
             type: 'LOCATION',
             location: 'R1',
-            readable: true,
-            writable: true,
         },
         { type: 'ARROW' },
         {
             type: 'LOCATION',
             location: 'ZERO',
-            readable: true,
-            writable: false,
         },
-        { type: 'OPERATOR', operator: '+' },
+        { type: 'BINARY_OPERATOR', operator: '+' },
         {
             type: 'LOCATION',
             location: 'ONE',
-            readable: true,
-            writable: false,
         },
         { type: 'GOTO' },
-        { type: 'NUMBER', number: 0 },
+        { type: 'JUMP_ADDRESS', number: 0 },
         { type: 'IF' },
         { type: 'CONDITION', condition: 'N' },
         { type: 'GOTO' },
-        { type: 'NUMBER', number: 1 },
+        { type: 'JUMP_ADDRESS', number: 1 },
         {
             type: 'LOCATION',
             location: 'R1',
-            readable: true,
-            writable: true,
         },
         { type: 'ARROW' },
         {
             type: 'LOCATION',
             location: 'ONE',
-            readable: true,
-            writable: false,
         },
         {
             type: 'READ_WRITE',

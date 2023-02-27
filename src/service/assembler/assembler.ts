@@ -30,10 +30,10 @@ export function assemble(inst: AnalysedInstruction): number {
         result |= 0x1000_0000;
     }
 
-    if (inst.shift === 'left') {
-        result |= 0x0400_0000;
-    } else if (inst.shift === 'right') {
+    if (inst.shift === 'lsh') {
         result |= 0x0200_0000;
+    } else if (inst.shift === 'rsh') {
+        result |= 0x0400_0000;
     }
 
     result |= getRegisterIndex(inst.busA) << 8;
@@ -47,11 +47,11 @@ export function assemble(inst: AnalysedInstruction): number {
         result |= 0x0080_0000;
     }
     if (inst.mbrFlag) {
-        result |= 0x0900_0000;
+        result |= 0x0100_0000;
     }
     if (inst.aMuxFlag) {
         result |= 0x8000_0000;
     }
 
-    return result;
+    return result & -1;
 }

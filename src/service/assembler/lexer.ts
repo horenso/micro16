@@ -1,4 +1,9 @@
-import { isLocation, isReadable, isWritable } from '../registers';
+import {
+    isLocation,
+    isReadable,
+    isWritable,
+    RegisterOrConstant,
+} from '../registers';
 import { Result, Ok, Err, Token, Operator } from './types';
 
 export function lex(line: string): Result<Token[]> {
@@ -26,10 +31,6 @@ class Lexer {
 
     private matchPositiveNumber(): boolean {
         const numberMatch = this.line.match(/^\d+/);
-        const previousToken: Token | undefined =
-            this.result.length > 0
-                ? this.result[this.result.length - 1]
-                : undefined;
         if (numberMatch === null) {
             return false;
         }
@@ -40,44 +41,27 @@ class Lexer {
         // '0' or '1' are locations expect when
         // the previous token is 'goto', then
         // they are jump addresses.
-        if (
-            (match === '0' || match === '1') &&
-            previousToken?.type === 'GOTO'
-        ) {
+        const previousToken: Token | undefined =
+            this.result.length > 0
+                ? this.result[this.result.length - 1]
+                : undefined;
+        if (previousToken?.type === 'GOTO') {
+            const address = parseInt(match, 10);
             this.result.push({
-                type: 'NUMBER',
-                number: parseInt(match, 10),
+                type: 'JUMP_ADDRESS',
+                number: address,
             });
         } else {
             if (match === '0') {
-                this.result.push({
-                    type: 'LOCATION',
-                    location: 'ZERO',
-                    readable: true,
-                    writable: false,
-                });
+                this.result.push({ type: 'LOCATION', location: 'ZERO' });
+            } else if (match === '1') {
+                this.result.push({ type: 'LOCATION', location: 'ONE' });
             } else {
-                this.result.push({
-                    type: 'LOCATION',
-                    location: 'ONE',
-                    readable: true,
-                    writable: false,
-                });
+                return false;
             }
         }
         this.advance(match.length);
         return true;
-    }
-
-    private matchOperator(): boolean {
-        const operatorMatch = this.line.match(/^(\+|-|&)/);
-        if (operatorMatch !== null) {
-            const match = operatorMatch[0] as Operator;
-            this.result.push({ type: 'OPERATOR', operator: match });
-            this.advance(operatorMatch[0].length);
-            return true;
-        }
-        return false;
     }
 
     private matchLocationOrFunction(): boolean {
@@ -88,8 +72,6 @@ class Lexer {
             this.result.push({
                 type: 'LOCATION',
                 location: 'MINUS_ONE',
-                readable: true,
-                writable: false,
             });
             this.advance(minusOneMatch[0].length);
             return true;
@@ -101,8 +83,6 @@ class Lexer {
                 this.result.push({
                     type: 'LOCATION',
                     location: match,
-                    readable: isReadable(match),
-                    writable: isWritable(match),
                 });
                 this.advance(matchWord[0].length);
                 return true;
@@ -145,7 +125,18 @@ class Lexer {
                 this.matchExact('if', { type: 'IF' }) ||
                 this.matchExact('N', { type: 'CONDITION', condition: 'N' }) ||
                 this.matchExact('Z', { type: 'CONDITION', condition: 'Z' }) ||
-                this.matchOperator();
+                this.matchExact('~', {
+                    type: 'UNARY_OPERATOR',
+                    operator: '~',
+                }) ||
+                this.matchExact('+', {
+                    type: 'BINARY_OPERATOR',
+                    operator: '+',
+                }) ||
+                this.matchExact('&', {
+                    type: 'BINARY_OPERATOR',
+                    operator: '&',
+                });
             if (!matched) {
                 return Err(`Invalid from: ${this.line}.`);
             }

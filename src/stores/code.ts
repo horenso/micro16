@@ -16,9 +16,10 @@ export const useCodeStore = defineStore('code', {
                     if (typeof code === 'string') {
                         return code;
                     } else {
+                        console.log(code);
                         return formatNumber(
                             code,
-                            useSettingsStore().numberSystem,
+                            useSettingsStore().numberSystem as 2 | 10 | 16,
                             32
                         );
                     }
