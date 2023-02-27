@@ -9,10 +9,12 @@ start: build-base
 		--rm \
 		micro16-app-base
 
-host: build-full \
+host: build-full
 	docker run \
 		--rm \
 		--network=npm-network \
+		--name micro16 \
+		--detach \
 		micro16-app-full .
 
 test: build-test
@@ -39,5 +41,3 @@ build-test:
 
 build-full:
 	docker build --target full --tag micro16-app-full .
-
-test:
