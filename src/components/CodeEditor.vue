@@ -1,12 +1,19 @@
 <script setup lang="ts">
 import { useCodeStore } from '../stores/code';
-import { useSettingsStore } from '../stores/settings';
 import { ref } from 'vue';
+import { isLocation } from '../service/registers';
 
 const codeStore = useCodeStore();
-const settingsStore = useSettingsStore();
 
 const textareaRef = ref<HTMLTextAreaElement>();
+const codeOverlayRef = ref<HTMLDivElement>();
+
+codeStore.$subscribe((code) => {
+    if (codeOverlayRef.value === undefined) {
+        return;
+    }
+    codeOverlayRef.value.innerHTML = highlightCode(codeStore.code);
+});
 
 function insertSpaces() {
     if (textareaRef.value === undefined) {
@@ -21,6 +28,33 @@ function insertSpaces() {
 
     textarea.value = value.substring(0, start) + spaces + value.substring(end);
     textarea.selectionStart = textarea.selectionEnd = start + spaces.length;
+}
+
+function highlightCode(code: string): string {
+    const lines = code.split('\n');
+    let highlightedCode = '';
+    for (let i = 0; i < lines.length; i++) {
+        const words = lines[i].split(' ');
+        for (let j = 0; j < words.length; j++) {
+            if (isKeyword(words[j])) {
+                highlightedCode +=
+                    "<span class='keyword'>" + words[j] + '</span>';
+            } else {
+                highlightedCode += words[j];
+            }
+            if (j < words.length - 1) {
+                highlightedCode += ' ';
+            }
+        }
+        if (i < lines.length - 1) {
+            highlightedCode += '\n';
+        }
+    }
+    return highlightedCode;
+}
+
+function isKeyword(word: string): boolean {
+    return isLocation(word) || word === 'lsh' || word === 'rsh';
 }
 </script>
 
@@ -38,16 +72,26 @@ function insertSpaces() {
                     <span class="line-number-text">{{ i + 1 }}</span>
                 </div>
             </div>
-            <textarea
-                v-model="codeStore.code"
-                wrap="off"
-                ref="textareaRef"
-                @keydown.tab.prevent="insertSpaces"
-            ></textarea>
+            <div class="code-area">
+                <textarea
+                    v-model="codeStore.code"
+                    wrap="off"
+                    ref="textareaRef"
+                    spellcheck="false"
+                    @keydown.tab.prevent="insertSpaces"
+                ></textarea>
+                <pre class="code-overlay" ref="codeOverlayRef"></pre>
+            </div>
         </div>
         <div class="assembled-code">{{ codeStore.assembledCodeString }}</div>
     </div>
 </template>
+
+<style>
+.keyword {
+    color: rebeccapurple;
+}
+</style>
 
 <style scoped>
 .wrapper {
@@ -58,6 +102,7 @@ function insertSpaces() {
     gap: 1em;
     line-height: 1em;
     padding: 1em;
+    min-height: 10em;
 }
 
 .editor {
@@ -66,16 +111,6 @@ function insertSpaces() {
     flex-direction: row;
     font-family: 'Courier New', monospace;
     gap: 10px;
-}
-
-.editor > textarea {
-    flex: 1;
-    outline: none;
-    border: none;
-    resize: none;
-    padding: 0;
-    margin: 0;
-    line-height: inherit;
 }
 
 .line-numbers {
@@ -123,6 +158,41 @@ function insertSpaces() {
     -moz-user-select: none;
     -ms-user-select: none;
     user-select: none;
+}
+
+.code-area {
+    flex-grow: 1;
+    display: flex;
+    position: relative;
+}
+
+.code-area > textarea {
+    flex: 1;
+    outline: none;
+    border: none;
+    resize: none;
+    padding: 0;
+    margin: 0;
+    line-height: inherit;
+    height: 100%;
+    color: transparent;
+    background: transparent;
+    caret-color: red;
+}
+
+.code-area > * {
+    line-height: inherit;
+}
+
+.code-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    box-sizing: border-box;
+    pointer-events: none;
 }
 
 .assembled-code {
