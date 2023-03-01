@@ -106,6 +106,10 @@ class Lexer {
 
     public lex(): Result<Token[]> {
         while (this.line.length > 0) {
+            if (this.line.startsWith('#')) {
+                // Start of comment.
+                return Ok(this.result);
+            }
             let matched =
                 this.ignoreWhitespace() ||
                 this.matchLocationOrFunction() ||
