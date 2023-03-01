@@ -1,43 +1,39 @@
 <script setup lang="ts">
-import { ref } from 'vue';
 import { useCodeStore } from '../stores/code';
 import { useSettingsStore } from '../stores/settings';
 
 const codeStore = useCodeStore();
 const settingsStore = useSettingsStore();
-
-const lineNumbersRef = ref(null);
-const textareaRef = ref(null);
-
-function onScroll() {
-    console.log('onScroll');
-    // lineNumbersRef.value.scrollTop = textareaRef.value.scrollTop;
-    // lineNumbersRef.value.scrollLeft = textareaRef.value.scrollLeft;
-}
 </script>
 
 <template>
     <h1>Coding Editor</h1>
     <div class="wrapper">
         <div class="editor">
-            <div class="line-numbers" ref="lineNumbersRef">
+            <div class="line-numbers">
                 <div
-                    v-for="i in codeStore.code.split('\n').length"
+                    v-for="(line, i) in codeStore.code.split('\n')"
+                    :key="i"
                     class="line-number"
                 >
-                    {{ i }}
+                    <input
+                        type="checkbox"
+                        class="breakpoint"
+                        v-model="line.breakpoints"
+                    />
+                    <span class="line-number-text">{{ i + 1 }}</span>
                 </div>
             </div>
             <textarea
                 v-model="codeStore.code"
                 wrap="off"
-                ref="textareaRef"
-                @scroll="onScroll"
             ></textarea>
         </div>
         <div class="assembled-code">{{ codeStore.assembledCodeString }}</div>
     </div>
 </template>
+
+
 
 <style scoped>
 .wrapper {
@@ -45,13 +41,11 @@ function onScroll() {
     display: grid;
     grid-template-columns: 1fr 1fr;
     justify-items: stretch;
-    /* height: 12em; */
-    /* max-height: 12em; */
     gap: 1em;
     line-height: 1em;
-    /* overflow: auto; */
     padding: 1em;
 }
+
 .editor {
     outline: 1px solid black;
     display: flex;
@@ -59,6 +53,7 @@ function onScroll() {
     font-family: 'Courier New', monospace;
     gap: 10px;
 }
+
 .editor > textarea {
     flex: 1;
     outline: none;
@@ -68,15 +63,54 @@ function onScroll() {
     margin: 0;
     line-height: inherit;
 }
+
 .line-numbers {
     background: #282a3a;
     color: lightgrey;
     box-sizing: border-box;
 }
+
 .line-number {
-    width: 2em;
+    display: flex;
+    align-items: center;
     text-align: right;
+    width: 3em;
+    padding-left: 0.3em;
 }
+
+.breakpoint {
+    margin: 0;
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    border-radius: 50%;
+    background-color: #282a3a;
+    
+    /* Slightly smaller than the line */
+    height: 0.8em;
+    width: 0.8em;
+}
+
+.breakpoint:hover {
+    background-color: #f09892;
+}
+
+.breakpoint:checked {
+    background-color: #f44336;
+}
+
+.line-number-text {
+    flex: 1;
+    
+    /* Not selectable: */
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+}
+
 .assembled-code {
     outline: 1px solid black;
     white-space: pre;
