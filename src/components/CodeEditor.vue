@@ -1,9 +1,27 @@
 <script setup lang="ts">
 import { useCodeStore } from '../stores/code';
 import { useSettingsStore } from '../stores/settings';
+import { ref } from 'vue';
 
 const codeStore = useCodeStore();
 const settingsStore = useSettingsStore();
+
+const textareaRef = ref<HTMLTextAreaElement>();
+
+function insertSpaces() {
+    if (textareaRef.value === undefined) {
+        return;
+    }
+    const textarea = textareaRef.value;
+    const start = textarea.selectionStart;
+    const end = textarea.selectionEnd;
+
+    const value = textarea.value;
+    const spaces = '  ';
+
+    textarea.value = value.substring(0, start) + spaces + value.substring(end);
+    textarea.selectionStart = textarea.selectionEnd = start + spaces.length;
+}
 </script>
 
 <template>
@@ -16,24 +34,20 @@ const settingsStore = useSettingsStore();
                     :key="i"
                     class="line-number"
                 >
-                    <input
-                        type="checkbox"
-                        class="breakpoint"
-                        v-model="line.breakpoints"
-                    />
+                    <input type="checkbox" class="breakpoint" />
                     <span class="line-number-text">{{ i + 1 }}</span>
                 </div>
             </div>
             <textarea
                 v-model="codeStore.code"
                 wrap="off"
+                ref="textareaRef"
+                @keydown.tab.prevent="insertSpaces"
             ></textarea>
         </div>
         <div class="assembled-code">{{ codeStore.assembledCodeString }}</div>
     </div>
 </template>
-
-
 
 <style scoped>
 .wrapper {
@@ -85,7 +99,7 @@ const settingsStore = useSettingsStore();
     -moz-appearance: none;
     border-radius: 50%;
     background-color: #282a3a;
-    
+
     /* Slightly smaller than the line */
     height: 0.8em;
     width: 0.8em;
@@ -101,7 +115,7 @@ const settingsStore = useSettingsStore();
 
 .line-number-text {
     flex: 1;
-    
+
     /* Not selectable: */
     -webkit-touch-callout: none;
     -webkit-user-select: none;
