@@ -1,13 +1,18 @@
 PWD = $(shell pwd)
 UID = $(shell id -u)
 
-start: build-base
+start-dev: build-base
 	docker run \
 		--interactive --tty \
 		--publish 5000:5000 \
 		--volume ${PWD}:/app \
 		--rm \
+		--detach \
+		--name micro16-dev \
 		micro16-app-base
+
+stop-dev:
+	docker stop micro16-dev
 
 host: build-full
 	docker run \
