@@ -6,16 +6,9 @@ import { isLocation } from '../service/registers';
 const codeStore = useCodeStore();
 
 const textareaRef = ref<HTMLTextAreaElement>();
-const codeOverlayRef = ref<HTMLDivElement>();
+const codeOverlayRef = ref<HTMLPreElement>();
 
-codeStore.$subscribe(() => {
-    if (codeOverlayRef.value === undefined) {
-        return;
-    }
-    codeOverlayRef.value.innerHTML = highlightCode(codeStore.code);
-});
-
-function insertSpaces() {
+function onTab() {
     if (textareaRef.value === undefined) {
         return;
     }
@@ -32,6 +25,15 @@ function insertSpaces() {
     const event = new Event('input');
     textarea.dispatchEvent(event);
 }
+
+codeStore.$subscribe(() => {
+    if (codeOverlayRef.value === undefined) {
+        return;
+    }
+    const res = highlightCode(codeStore.code);
+    console.log(res);
+    codeOverlayRef.value.innerHTML = res;
+});
 
 function highlightCode(code: string): string {
     const lines = code.split('\n');
@@ -57,7 +59,9 @@ function highlightCode(code: string): string {
 }
 
 function isKeyword(word: string): boolean {
-    return isLocation(word) || word === 'lsh' || word === 'rsh';
+    const a = isLocation(word) || word === 'lsh' || word === 'rsh';
+    console.log(word, a);
+    return a;
 }
 </script>
 
@@ -81,19 +85,13 @@ function isKeyword(word: string): boolean {
                     wrap="off"
                     ref="textareaRef"
                     spellcheck="false"
-                    @keydown.tab.prevent="insertSpaces"
+                    @keydown.tab.prevent="onTab"
                 ></textarea>
-                <pre
-                    class="code-overlay"
-                    ref="codeOverlayRef"
-                    v-html="codeStore.code"
-                ></pre>
+                <pre class="code-overlay" ref="codeOverlayRef"></pre>
             </div>
         </div>
         <div class="assembled-code">{{ codeStore.assembledCodeString }}</div>
     </div>
-
-    <pre style="background-color: aquamarine">{{ codeStore.code }}</pre>
 </template>
 
 <style>
