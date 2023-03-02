@@ -8,12 +8,10 @@ const codeStore = useCodeStore();
 const textareaRef = ref<HTMLTextAreaElement>();
 const codeOverlayRef = ref<HTMLDivElement>();
 
-codeStore.$subscribe((code) => {
-    console.log('code changed');
+codeStore.$subscribe(() => {
     if (codeOverlayRef.value === undefined) {
         return;
     }
-    codeOverlayRef;
     codeOverlayRef.value.innerHTML = highlightCode(codeStore.code);
 });
 
@@ -27,9 +25,12 @@ function insertSpaces() {
     const after = text.slice(textarea.selectionEnd, text.length);
     const cursor = textarea.selectionEnd + 2;
 
-    textarea.selectionStart = cursor;
-    textarea.selectionStart = cursor;
     textarea.value = before + '  ' + after;
+    textarea.selectionStart = cursor;
+    textarea.selectionEnd = cursor;
+    // Act as if the user inserted the spaces.
+    const event = new Event('input');
+    textarea.dispatchEvent(event);
 }
 
 function highlightCode(code: string): string {
@@ -92,7 +93,7 @@ function isKeyword(word: string): boolean {
         <div class="assembled-code">{{ codeStore.assembledCodeString }}</div>
     </div>
 
-    <pre>{{ codeStore.code }}</pre>
+    <pre style="background-color: aquamarine">{{ codeStore.code }}</pre>
 </template>
 
 <style>
