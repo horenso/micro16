@@ -9,9 +9,11 @@ const textareaRef = ref<HTMLTextAreaElement>();
 const codeOverlayRef = ref<HTMLDivElement>();
 
 codeStore.$subscribe((code) => {
+    console.log('code changed');
     if (codeOverlayRef.value === undefined) {
         return;
     }
+    codeOverlayRef;
     codeOverlayRef.value.innerHTML = highlightCode(codeStore.code);
 });
 
@@ -20,14 +22,14 @@ function insertSpaces() {
         return;
     }
     const textarea = textareaRef.value;
-    const start = textarea.selectionStart;
-    const end = textarea.selectionEnd;
+    const text = textarea.value;
+    const before = text.slice(0, textarea.selectionStart);
+    const after = text.slice(textarea.selectionEnd, text.length);
+    const cursor = textarea.selectionEnd + 2;
 
-    const value = textarea.value;
-    const spaces = '  ';
-
-    textarea.value = value.substring(0, start) + spaces + value.substring(end);
-    textarea.selectionStart = textarea.selectionEnd = start + spaces.length;
+    textarea.selectionStart = cursor;
+    textarea.selectionStart = cursor;
+    textarea.value = before + '  ' + after;
 }
 
 function highlightCode(code: string): string {
@@ -80,16 +82,22 @@ function isKeyword(word: string): boolean {
                     spellcheck="false"
                     @keydown.tab.prevent="insertSpaces"
                 ></textarea>
-                <pre class="code-overlay" ref="codeOverlayRef"></pre>
+                <pre
+                    class="code-overlay"
+                    ref="codeOverlayRef"
+                    v-html="codeStore.code"
+                ></pre>
             </div>
         </div>
         <div class="assembled-code">{{ codeStore.assembledCodeString }}</div>
     </div>
+
+    <pre>{{ codeStore.code }}</pre>
 </template>
 
 <style>
 .keyword {
-    color: rebeccapurple;
+    color: rgb(15, 177, 0);
 }
 </style>
 
