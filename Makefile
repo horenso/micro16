@@ -15,6 +15,7 @@ stop-dev:
 	docker stop micro16-dev
 
 host: build-full
+	docker stop micro16
 	docker run \
 		--rm \
 		--network=npm-network \
