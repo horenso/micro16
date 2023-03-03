@@ -2,6 +2,7 @@
 import { useCodeStore } from '../stores/code';
 import { ref } from 'vue';
 import { isLocation } from '../service/registers';
+import { lex } from '../service/assembler/lexer';
 
 const codeStore = useCodeStore();
 
@@ -38,30 +39,47 @@ codeStore.$subscribe(() => {
 function highlightCode(code: string): string {
     const lines = code.split('\n');
     let highlightedCode = '';
-    for (let i = 0; i < lines.length; i++) {
-        const words = lines[i].split(' ');
-        for (let j = 0; j < words.length; j++) {
-            if (isKeyword(words[j])) {
-                highlightedCode +=
-                    "<span class='keyword'>" + words[j] + '</span>';
-            } else {
-                highlightedCode += words[j];
-            }
-            if (j < words.length - 1) {
-                highlightedCode += ' ';
+    for (let line of lines) {
+        const result = lex(line, true);
+
+        // console.log(result);
+        if (!result.ok) {
+            highlightedCode += line + '\n';
+            continue;
+        }
+        for (let token of result.result) {
+            switch (token.type) {
+                case 'GOTO':
+                case 'IF':
+                case 'FUNCTION':
+                case 'LOCATION':
+                    highlightedCode +=
+                        "<span class='keyword'>" + token.text + '</span>';
+                    break;
+                case 'ARROW':
+                case 'UNARY_OPERATOR':
+                case 'BINARY_OPERATOR':
+                case 'L_PAREN':
+                case 'R_PAREN':
+                    highlightedCode +=
+                        "<span class='punctuation'>" + token.text + '</span>';
+                    break;
+                case 'COMMENT':
+                    highlightedCode +=
+                        "<span class='comment'>" + token.text + '</span>';
+                    break;
+                case 'GARBAGE':
+                    highlightedCode +=
+                        "<span class='garbage'>" + token.text + '</span>';
+                    break;
+                default:
+                    highlightedCode += token.text;
+                    break;
             }
         }
-        if (i < lines.length - 1) {
-            highlightedCode += '\n';
-        }
+        highlightedCode += '\n';
     }
     return highlightedCode;
-}
-
-function isKeyword(word: string): boolean {
-    const a = isLocation(word) || word === 'lsh' || word === 'rsh';
-    console.log(word, a);
-    return a;
 }
 </script>
 
@@ -85,18 +103,31 @@ function isKeyword(word: string): boolean {
                     wrap="off"
                     ref="textareaRef"
                     spellcheck="false"
+                    class="code-textarea"
                     @keydown.tab.prevent="onTab"
                 ></textarea>
                 <pre class="code-overlay" ref="codeOverlayRef"></pre>
             </div>
         </div>
-        <div class="assembled-code">{{ codeStore.assembledCodeString }}</div>
+        <div class="assembled-code">
+            {{ codeStore.assembledCodeString }}
+        </div>
     </div>
 </template>
 
+<!-- Syntax highlighting classes: -->
 <style>
 .keyword {
-    color: rgb(15, 177, 0);
+    color: rgb(86, 146, 129);
+}
+.punctuation {
+    color: rgb(129, 88, 35);
+}
+.comment {
+    color: grey;
+}
+.garbage {
+    background-color: rgba(255, 0, 0, 0.342);
 }
 </style>
 
@@ -173,7 +204,7 @@ function isKeyword(word: string): boolean {
     position: relative;
 }
 
-.code-area > textarea {
+.code-textarea {
     flex: 1;
     outline: none;
     border: none;
@@ -184,7 +215,12 @@ function isKeyword(word: string): boolean {
     height: 100%;
     color: transparent;
     background: transparent;
-    caret-color: red;
+    caret-color: rgb(0, 0, 0);
+}
+
+.code-textarea::selection {
+    color: transparent;
+    background-color: rgba(91, 116, 255, 0.548);
 }
 
 .code-area > * {
