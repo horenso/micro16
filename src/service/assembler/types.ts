@@ -9,55 +9,6 @@ export function isOperator(str?: string): str is Operator {
     return OPERATOR.some((a) => a === str);
 }
 
-interface SimpleToken {
-    type: 'GOTO' | 'IF' | 'L_PAREN' | 'R_PAREN' | 'ARROW';
-}
-
-interface LocationToken {
-    type: 'LOCATION';
-    location: Location;
-}
-
-export interface ReadWriteToken {
-    type: 'READ_WRITE';
-    readWrite: 'rd' | 'wr';
-}
-
-interface ConditionToken {
-    type: 'CONDITION';
-    condition: 'N' | 'Z';
-}
-
-interface FunctionToken {
-    type: 'FUNCTION';
-    name: 'lsh' | 'rsh';
-}
-
-interface UnaryOperatorToken {
-    type: 'UNARY_OPERATOR';
-    operator: '~';
-}
-
-interface BinaryOperatorToken {
-    type: 'BINARY_OPERATOR';
-    operator: '+' | '&';
-}
-
-interface JumpAddressToken {
-    type: 'JUMP_ADDRESS';
-    number: number;
-}
-
-export type Token =
-    | SimpleToken
-    | LocationToken
-    | ReadWriteToken
-    | ConditionToken
-    | FunctionToken
-    | UnaryOperatorToken
-    | BinaryOperatorToken
-    | JumpAddressToken;
-
 export type Shift = 'lsh' | 'rsh';
 
 interface NoOperation {
