@@ -96,8 +96,8 @@ export interface ParsedInstruction {
     readWrite?: 'rd' | 'wr';
 }
 
-// An AnalysedInstruction has already assigned all the buses and mar/mbr/a-mux flags.
-export interface AnalysedInstruction {
+// An AnalyzedInstruction has already assigned all the buses and mar/mbr/a-mux flags.
+export interface AnalyzedInstruction {
     busA: RegisterOrConstant;
     busB: RegisterOrConstant;
     busS: RegisterOrConstant;

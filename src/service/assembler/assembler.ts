@@ -1,7 +1,7 @@
 import { getRegisterIndex } from '../registers';
-import { AnalysedInstruction, Result } from './types';
+import { AnalyzedInstruction, Result } from './types';
 
-export function assemble(inst: AnalysedInstruction): number {
+export function assemble(inst: AnalyzedInstruction): number {
     let result = 0;
 
     if (inst.readWrite === 'rd') {

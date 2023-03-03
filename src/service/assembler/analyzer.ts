@@ -8,15 +8,15 @@ import {
     Shift,
     Statement,
     Result,
-    AnalysedInstruction,
+    AnalyzedInstruction,
     Ok,
 } from './types';
 
-export function analyse(inst: ParsedInstruction): Result<AnalysedInstruction> {
-    return new Analyser(inst).analyse();
+export function analyze(inst: ParsedInstruction): Result<AnalyzedInstruction> {
+    return new Analyzer(inst).analyze();
 }
 
-export class Analyser {
+export class Analyzer {
     private instruction: ParsedInstruction;
 
     private busA?: RegisterOrConstant;
@@ -217,7 +217,7 @@ export class Analyser {
         return EmptyOk();
     }
 
-    public analyse(): Result<AnalysedInstruction> {
+    public analyze(): Result<AnalyzedInstruction> {
         const readWrite = this.instruction.readWrite;
 
         const result = this.anayseStatements();

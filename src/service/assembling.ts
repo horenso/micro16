@@ -2,7 +2,7 @@ import { assemble } from './assembler/assembler';
 import { Ok, Result } from './assembler/types';
 import { parse } from './assembler/parser';
 import { lex } from './assembler/lexer';
-import { analyse } from './assembler/analyser';
+import { analyze } from './assembler/analyzer';
 
 export function assembleLine(line: string): Result<number> {
     const lexResult = lex(line);
@@ -17,10 +17,10 @@ export function assembleLine(line: string): Result<number> {
     }
     console.log('Parsed Statement');
     console.log(parseResult.result);
-    const analyseResult = analyse(parseResult.result);
-    if (!analyseResult.ok) {
-        return analyseResult;
+    const analyzedResult = analyze(parseResult.result);
+    if (!analyzedResult.ok) {
+        return analyzedResult;
     }
-    console.log('Analysed Statement:', analyseResult.result);
-    return Ok(assemble(analyseResult.result));
+    console.log('analyzed Statement:', analyzedResult.result);
+    return Ok(assemble(analyzedResult.result));
 }
