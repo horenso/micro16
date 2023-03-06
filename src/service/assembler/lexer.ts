@@ -2,11 +2,16 @@ import { isLocation } from '../registers';
 import { Result, Ok, Err } from './types';
 import { Token } from './token';
 
-export function lex(
-    line: string,
-    verboseAndNeverFail = false
-): Result<Token[]> {
-    return new Lexer(line, verboseAndNeverFail).lex();
+export function lex(line: string): Result<Token[]> {
+    return new Lexer(line, false).lex();
+}
+
+export function lexNeverFail(line: string): Token[] {
+    const result = new Lexer(line, true).lex();
+    if (!result.ok) {
+        return [];
+    }
+    return result.result;
 }
 
 class Lexer {
@@ -181,7 +186,7 @@ class Lexer {
                     this.result.push({ type: 'GARBAGE', text: this.line });
                     return Ok(this.result);
                 } else {
-                    return Err(`Invalid from: ${this.line}.`);
+                    return Err(`Invalid token: '${this.line}'.`);
                 }
             }
         }

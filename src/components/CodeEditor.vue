@@ -1,13 +1,22 @@
 <script setup lang="ts">
 import { useCodeStore } from '../stores/code';
-import { ref } from 'vue';
-import { isLocation } from '../service/registers';
+import { reactive, ref } from 'vue';
 import { lex } from '../service/assembler/lexer';
+import { Token } from '../service/assembler/token';
 
 const codeStore = useCodeStore();
 
 const textareaRef = ref<HTMLTextAreaElement>();
 const codeOverlayRef = ref<HTMLPreElement>();
+
+const tokenizedLines: Token[][] = [];
+
+function onInput(event: Event) {
+    const target = event.target as HTMLInputElement;
+    codeStore.code = target.value;
+    const res = highlightCode(codeStore.code);
+    (codeOverlayRef.value as HTMLPreElement).innerHTML = res;
+}
 
 function onTab() {
     if (textareaRef.value === undefined) {
@@ -23,31 +32,19 @@ function onTab() {
     textarea.selectionStart = cursor;
     textarea.selectionEnd = cursor;
     // Act as if the user inserted the spaces.
-    const event = new Event('input');
-    textarea.dispatchEvent(event);
+    textarea.dispatchEvent(new Event('input'));
 }
 
-codeStore.$subscribe(() => {
-    if (codeOverlayRef.value === undefined) {
-        return;
-    }
-    const res = highlightCode(codeStore.code);
-    console.log(res);
-    codeOverlayRef.value.innerHTML = res;
-});
+function onScroll() {
+    const textarea = textareaRef.value as HTMLTextAreaElement;
+    const overlay = codeOverlayRef.value as HTMLPreElement;
+    overlay.scrollLeft = textarea.scrollLeft;
+}
 
 function highlightCode(code: string): string {
-    const lines = code.split('\n');
     let highlightedCode = '';
-    for (let line of lines) {
-        const result = lex(line, true);
-
-        // console.log(result);
-        if (!result.ok) {
-            highlightedCode += line + '\n';
-            continue;
-        }
-        for (let token of result.result) {
+    for (let line of codeStore.tokenizedLines) {
+        for (let token of line) {
             switch (token.type) {
                 case 'GOTO':
                 case 'IF':
@@ -99,12 +96,15 @@ function highlightCode(code: string): string {
             </div>
             <div class="code-area">
                 <textarea
-                    v-model="codeStore.code"
                     wrap="off"
                     ref="textareaRef"
                     spellcheck="false"
                     class="code-textarea"
+                    :value="codeStore.code"
+                    rows="10"
+                    @input="onInput"
                     @keydown.tab.prevent="onTab"
+                    @scroll="onScroll"
                 ></textarea>
                 <pre class="code-overlay" ref="codeOverlayRef"></pre>
             </div>
@@ -127,7 +127,7 @@ function highlightCode(code: string): string {
     color: grey;
 }
 .garbage {
-    background-color: rgba(255, 0, 0, 0.342);
+    text-decoration: underline wavy 1px rgba(255, 0, 0, 0.342);
 }
 </style>
 
@@ -236,6 +236,7 @@ function highlightCode(code: string): string {
     margin: 0;
     box-sizing: border-box;
     pointer-events: none;
+    overflow-y: auto;
 }
 
 .assembled-code {

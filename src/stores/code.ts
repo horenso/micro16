@@ -2,14 +2,20 @@ import { defineStore } from 'pinia';
 import { assembleLine } from '../service/assembling';
 import { formatNumber } from '../service/formatting';
 import { useSettingsStore } from './settings';
+import { lex, lexNeverFail } from '../service/assembler/lexer';
+import { Token } from '../service/assembler/token';
 
 export const useCodeStore = defineStore('code', {
     state: () => ({
         code: '',
         isDirty: true,
         assembledCode: [],
+        tokenLines: [],
     }),
     getters: {
+        tokenizedLines: (state) => {
+            return state.code.split('\n').map((l) => lexNeverFail(l));
+        },
         assembledCodeString: (state) => {
             return state.assembledCode
                 .map((code) => {
@@ -35,11 +41,6 @@ export const useCodeStore = defineStore('code', {
             }
             let newAssembledCode: any = [];
             const lines = this.code.split('\n');
-            // Remove the last empty line
-            // "a\nb\n" should become ["a","b"] not [a,b,""]
-            if (lines[lines.length - 1] == '') {
-                lines.pop();
-            }
             lines.forEach((line) => {
                 const result = assembleLine(line);
                 if (result.ok) {
