@@ -23,6 +23,16 @@ class Lexer {
         this.line = this.line.slice(amount);
     }
 
+    private getPreviousToken(): Token | undefined {
+        for (let i = this.result.length - 1; i >= 0; --i) {
+            const token = this.result[i];
+            if (token.type !== 'WHITESPACE') {
+                return token;
+            }
+        }
+        return undefined;
+    }
+
     private ignoreWhitespace(): boolean {
         const whitespaceMatch = this.line.match(/^(\s|;+)/);
         // Ignore whitespace and semicolons
@@ -49,12 +59,12 @@ class Lexer {
         // '0' or '1' are locations expect when
         // the previous token is 'goto', then
         // they are jump addresses.
-        const previousToken: Token | undefined =
-            this.result.length > 0
-                ? this.result[this.result.length - 1]
-                : undefined;
-        if (previousToken?.type === 'GOTO') {
+        const previousToken = this.getPreviousToken();
+        if (previousToken === undefined || previousToken.type === 'GOTO') {
             const address = parseInt(match, 10);
+            if (address > 255) {
+                return false;
+            }
             this.result.push({
                 type: 'JUMP_ADDRESS',
                 number: address,

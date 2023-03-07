@@ -41,8 +41,13 @@ function onScroll() {
     overlay.scrollLeft = textarea.scrollLeft;
 }
 
+function getSpan(className: string, text: string): string {
+    return `<span class=${className}>${text}</span>`;
+}
+
 function highlightCode(code: string): string {
     let highlightedCode = '';
+    console.log(codeStore.tokenizedLines)
     for (let line of codeStore.tokenizedLines) {
         for (let token of line) {
             switch (token.type) {
@@ -50,24 +55,23 @@ function highlightCode(code: string): string {
                 case 'IF':
                 case 'FUNCTION':
                 case 'LOCATION':
-                    highlightedCode +=
-                        "<span class='keyword'>" + token.text + '</span>';
+                    highlightedCode += getSpan("keyword", token.text);
                     break;
                 case 'ARROW':
                 case 'UNARY_OPERATOR':
                 case 'BINARY_OPERATOR':
                 case 'L_PAREN':
                 case 'R_PAREN':
-                    highlightedCode +=
-                        "<span class='punctuation'>" + token.text + '</span>';
+                    highlightedCode += getSpan("punctuation", token.text);
                     break;
                 case 'COMMENT':
-                    highlightedCode +=
-                        "<span class='comment'>" + token.text + '</span>';
+                    highlightedCode += getSpan("comment", token.text);
                     break;
                 case 'GARBAGE':
-                    highlightedCode +=
-                        "<span class='garbage'>" + token.text + '</span>';
+                    highlightedCode += getSpan("garbage", token.text);
+                    break;
+                case 'JUMP_ADDRESS':
+                    highlightedCode += getSpan("number", token.text);
                     break;
                 default:
                     highlightedCode += token.text;
@@ -85,27 +89,14 @@ function highlightCode(code: string): string {
     <div class="wrapper">
         <div class="editor">
             <div class="line-numbers">
-                <div
-                    v-for="(line, i) in codeStore.code.split('\n')"
-                    :key="i"
-                    class="line-number"
-                >
+                <div v-for="(line, i) in codeStore.code.split('\n')" :key="i" class="line-number">
                     <input type="checkbox" class="breakpoint" />
                     <span class="line-number-text">{{ i + 1 }}</span>
                 </div>
             </div>
             <div class="code-area">
-                <textarea
-                    wrap="off"
-                    ref="textareaRef"
-                    spellcheck="false"
-                    class="code-textarea"
-                    :value="codeStore.code"
-                    rows="10"
-                    @input="onInput"
-                    @keydown.tab.prevent="onTab"
-                    @scroll="onScroll"
-                ></textarea>
+                <textarea wrap="off" ref="textareaRef" spellcheck="false" class="code-textarea" :value="codeStore.code"
+                    rows="10" @input="onInput" @keydown.tab.prevent="onTab" @scroll="onScroll"></textarea>
                 <pre class="code-overlay" ref="codeOverlayRef"></pre>
             </div>
         </div>
@@ -120,14 +111,21 @@ function highlightCode(code: string): string {
 .keyword {
     color: rgb(86, 146, 129);
 }
+
 .punctuation {
     color: rgb(129, 88, 35);
 }
+
 .comment {
     color: grey;
 }
+
 .garbage {
     text-decoration: underline wavy 1px rgba(255, 0, 0, 0.342);
+}
+
+.number {
+    color: rgb(57, 92, 0);
 }
 </style>
 
@@ -223,7 +221,7 @@ function highlightCode(code: string): string {
     background-color: rgba(91, 116, 255, 0.548);
 }
 
-.code-area > * {
+.code-area>* {
     line-height: inherit;
 }
 
