@@ -1,24 +1,16 @@
 <script setup lang="ts">
 import { ref } from 'vue';
 import { useCodeStore } from '@/stores/code';
-import { Token } from '@/service/assembler/token';
 
 const codeStore = useCodeStore();
 
 const textareaRef = ref<HTMLTextAreaElement>();
 const codeOverlayRef = ref<HTMLPreElement>();
 
-const tokenizedLines: Token[][] = [];
-
 function onInput(event: Event) {
     const target = event.target as HTMLInputElement;
     codeStore.setCode(target.value);
 }
-
-codeStore.$subscribe(() => {
-    const res = highlightCode(codeStore.code);
-    (codeOverlayRef.value as HTMLPreElement).innerHTML = res;
-});
 
 function onTab() {
     if (textareaRef.value === undefined) {
@@ -42,47 +34,6 @@ function onScroll() {
     const overlay = codeOverlayRef.value as HTMLPreElement;
     overlay.scrollLeft = textarea.scrollLeft;
 }
-
-function getSpan(className: string, text: string): string {
-    return `<span class=${className}>${text}</span>`;
-}
-
-function highlightCode(code: string): string {
-    let highlightedCode = '';
-    for (let line of codeStore.tokenizedLines) {
-        for (let token of line) {
-            switch (token.type) {
-                case 'GOTO':
-                case 'IF':
-                case 'FUNCTION':
-                case 'LOCATION':
-                    highlightedCode += getSpan('keyword', token.text);
-                    break;
-                case 'ARROW':
-                case 'UNARY_OPERATOR':
-                case 'BINARY_OPERATOR':
-                case 'L_PAREN':
-                case 'R_PAREN':
-                    highlightedCode += getSpan('punctuation', token.text);
-                    break;
-                case 'COMMENT':
-                    highlightedCode += getSpan('comment', token.text);
-                    break;
-                case 'GARBAGE':
-                    highlightedCode += getSpan('garbage', token.text);
-                    break;
-                case 'JUMP_ADDRESS':
-                    highlightedCode += getSpan('number', token.text);
-                    break;
-                default:
-                    highlightedCode += token.text;
-                    break;
-            }
-        }
-        highlightedCode += '\n';
-    }
-    return highlightedCode;
-}
 </script>
 
 <template>
@@ -95,7 +46,14 @@ function highlightCode(code: string): string {
                     class="line-number"
                 >
                     <input type="checkbox" class="breakpoint" />
-                    <span class="line-number-text">{{ i }}</span>
+                    <span
+                        class="line-number-text"
+                        :class="{
+                            'line-number-selected':
+                                codeStore.activeLineIndex === i,
+                        }"
+                        >{{ i }}</span
+                    >
                 </div>
             </div>
             <div class="code-area">
@@ -110,17 +68,39 @@ function highlightCode(code: string): string {
                     @keydown.tab.prevent="onTab"
                     @scroll="onScroll"
                 ></textarea>
-                <pre class="code-overlay" ref="codeOverlayRef"></pre>
+                <pre
+                    class="code-overlay"
+                    ref="codeOverlayRef"
+                    v-html="codeStore.codeOverlay"
+                ></pre>
             </div>
         </div>
         <div class="assembled-code">
-            {{ codeStore.assembledCodeString }}
+            <div
+                v-for="(line, i) in codeStore.assembledCodeString.split('\n')"
+                class="assembled-code-line"
+                :class="{
+                    'assembled-code-line-active':
+                        codeStore.activeLineIndex === i,
+                }"
+            >
+                {{ line }}
+            </div>
         </div>
     </div>
 </template>
 
 <!-- Syntax highlighting classes: -->
 <style>
+.active-line {
+    background-color: #ff110041;
+    display: block;
+}
+
+.assembled-code-line-active {
+    background-color: #ff110041;
+}
+
 .keyword {
     color: #a72f2f;
 }
@@ -143,14 +123,7 @@ function highlightCode(code: string): string {
 </style>
 
 <style scoped>
-.wrapper > * {
-    font-family: 'Verdana,sans-serif', monospace;
-    font-size: 1.5rem;
-    /* box-sizing: border-box; */
-}
-
 .wrapper {
-    margin: 0 1em 0 1em;
     display: grid;
     grid-template-columns: 1fr 1fr;
     justify-items: stretch;
@@ -159,11 +132,16 @@ function highlightCode(code: string): string {
     min-height: 10em;
 }
 
+.wrapper > * {
+    font-family: 'Verdana,sans-serif', monospace;
+    font-size: 1.5rem;
+}
+
 .editor {
-    outline: 1px solid black;
     display: flex;
+    outline: 1px solid;
     flex-direction: row;
-    gap: 1em;
+    position: relative;
 }
 
 .line-numbers {
@@ -210,6 +188,10 @@ function highlightCode(code: string): string {
     -moz-user-select: none;
     -ms-user-select: none;
     user-select: none;
+}
+
+.line-number-selected {
+    color: #f09892;
 }
 
 .code-area {
