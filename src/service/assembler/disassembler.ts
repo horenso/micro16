@@ -5,7 +5,7 @@ function getJump(inst: number): Jump | undefined {
     if (toAddress === 0) {
         return undefined;
     }
-    const conditionEncoded = inst & 0x9fff_ffff;
+    const conditionEncoded = inst & 0x6000_0000;
     let condition: undefined | 'N' | 'Z' = undefined;
     if (conditionEncoded == 0x2000_0000) {
         condition = 'N';
@@ -15,7 +15,7 @@ function getJump(inst: number): Jump | undefined {
     return { condition: condition, toAddress: toAddress };
 }
 
-function getOperator(inst: number): Operator {
+function getOperator(inst: number): Operator | undefined {
     const operatorEncoded = inst & 0x1800_0000;
     if (operatorEncoded === 0x0800_0000) {
         return '+';
@@ -23,11 +23,14 @@ function getOperator(inst: number): Operator {
     if (operatorEncoded === 0x1800_0000) {
         return '~';
     }
-    return '&';
+    if (operatorEncoded === 0x1000_0000) {
+        return '&';
+    }
+    return undefined;
 }
 
 function getShift(inst: number): Shift | undefined {
-    const shiftEncoded = inst & 0xf9ff_ffff;
+    const shiftEncoded = inst & 0x0400_0000;
     if (shiftEncoded === 0) {
         return undefined;
     }
