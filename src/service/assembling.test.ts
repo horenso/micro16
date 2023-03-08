@@ -1,5 +1,5 @@
-import { assembleLine } from './assembling';
 import { test, expect } from 'vitest';
+import { assembleLine } from './assembling';
 
 function testAssembleSuccess(line: string, result: number) {
     expect(assembleLine(line)).toMatchObject({ ok: true, result: result & -1 });
@@ -47,7 +47,7 @@ test('Multiple registers', () => {
     testAssembleSuccess('MAR<-R6; MBR<-R8; wr; R1<-R8', 0x01b5_ac00);
 });
 
-test('Edge caes', () => {
+test('Edge cases', () => {
     testAssembleSuccess('MBR<-MBR', 0x8100_0000); // MBR can be assigned to MBR
     testAssemblingError('R1 <- 1~1'); // ~ takes only one operand
     testAssemblingError('MAR <- MBR'); // "MBR cannot be used as input for MAR."

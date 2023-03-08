@@ -1,4 +1,4 @@
-import { Location, Readable, RegisterOrConstant, Writable } from '../registers';
+import { Readable, RegisterOrConstant, Writable } from '@/service/registers';
 
 const OPERATOR = ['+', '&', '~'] as const;
 export type Operator = typeof OPERATOR[number];

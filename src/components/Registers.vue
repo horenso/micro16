@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import { formatNumber } from '../service/formatting';
-import { useRegistersStore, REGISTER_NAMES } from '../stores/registers';
-import { useSettingsStore } from '../stores/settings';
+import { formatNumber } from '@/service/formatting';
+import { useRegistersStore, REGISTER_NAMES } from '@/stores/registers';
+import { useSettingsStore } from '@/stores/settings';
 
 const settings = useSettingsStore();
 const registers = useRegistersStore();

@@ -1,5 +1,5 @@
-import { formatNumber } from './formatting';
 import { test, expect } from 'vitest';
+import { formatNumber } from './formatting';
 
 test('Format -1', () => {
     // 4 Bits

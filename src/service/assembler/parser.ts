@@ -1,4 +1,4 @@
-import { isReadable, isWritable } from '../registers';
+import { isReadable, isWritable } from '@/service/registers';
 import {
     EmptyOk,
     EmptyResult,
@@ -8,12 +8,11 @@ import {
     Ok,
     Operation,
     ParsedInstruction,
-    ReadWriteToken,
     Result,
     Statement,
-    Token,
 } from './types';
 import { lex } from './lexer';
+import { Token, ReadWriteToken } from './token';
 
 export function parseLine(line: string): Result<ParsedInstruction> {
     let result = lex(line);
@@ -102,7 +101,7 @@ class Parser {
             const operator = firstToken.operator;
             const locationToken = this.eatToken();
             if (locationToken?.type !== 'LOCATION') {
-                return Err(`Expecpted register after ${operator}.`);
+                return Err(`Expected register after ${operator}.`);
             }
             if (!isReadable(locationToken.location)) {
                 return Err(`${locationToken.location} is not readable.`);
@@ -191,8 +190,8 @@ class Parser {
             // be a an expression (starting with lsh/rsh or '(').
             return this.parseExpression();
         }
-        const secondPreekedToken = this.peekToken(1);
-        if (secondPreekedToken?.type !== 'ARROW') {
+        const secondPeekedToken = this.peekToken(1);
+        if (secondPeekedToken?.type !== 'ARROW') {
             // The location is just the left hand side of an operation.
             return this.parseExpression();
         }

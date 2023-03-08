@@ -1,5 +1,5 @@
-import { parseLine } from './parser';
 import { expect, test } from 'vitest';
+import { parseLine } from './parser';
 import { Result, ParsedInstruction, Ok } from './types';
 
 test('Simple addition', () => {

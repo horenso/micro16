@@ -1,9 +1,9 @@
 import { defineStore } from 'pinia';
-import { assembleLine } from '../service/assembling';
-import { formatNumber } from '../service/formatting';
-import { useSettingsStore } from './settings';
-import { lexNeverFail } from '../service/assembler/lexer';
-import { Token } from '../service/assembler/token';
+import { assembleLine } from '@/service/assembling';
+import { formatNumber } from '@/service/formatting';
+import { useSettingsStore } from '@/stores/settings';
+import { lexNeverFail } from '@/service/assembler/lexer';
+import { Token } from '@/service/assembler/token';
 
 interface ErrorReport {
     lineNumber: number;

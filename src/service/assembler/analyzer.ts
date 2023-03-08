@@ -1,4 +1,4 @@
-import { Location, RegisterOrConstant } from '../registers';
+import { RegisterOrConstant } from '@/service/registers';
 import {
     ParsedInstruction,
     EmptyResult,
@@ -189,7 +189,7 @@ export class Analyzer {
         return EmptyOk();
     }
 
-    private anayseStatements(): EmptyResult {
+    private analyzeStatements(): EmptyResult {
         this.sortStatements();
 
         for (let stmt of this.instruction.statements) {
@@ -220,7 +220,7 @@ export class Analyzer {
     public analyze(): Result<AnalyzedInstruction> {
         const readWrite = this.instruction.readWrite;
 
-        const result = this.anayseStatements();
+        const result = this.analyzeStatements();
         if (!result.ok) {
             return result;
         }

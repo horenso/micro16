@@ -1,4 +1,4 @@
-import { isLocation } from '../registers';
+import { isLocation } from '@/service/registers';
 import { Result, Ok, Err } from './types';
 import { Token } from './token';
 

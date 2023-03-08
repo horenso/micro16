@@ -1,8 +1,8 @@
 <script setup lang="ts">
-import Toolbar from "./components/Toolbar.vue";
-import Memory from "./components/Memory.vue";
-import Registers from "./components/Registers.vue";
-import CodeEditor from "./components/CodeEditor.vue";
+import Toolbar from '@/components/Toolbar.vue';
+import Memory from '@/components/Memory.vue';
+import Registers from '@/components/Registers.vue';
+import CodeEditor from '@/components/CodeEditor.vue';
 </script>
 
 <template>
@@ -12,6 +12,4 @@ import CodeEditor from "./components/CodeEditor.vue";
     <Registers />
 </template>
 
-<style scoped>
-
-</style>
+<style scoped></style>

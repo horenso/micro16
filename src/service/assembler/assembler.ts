@@ -1,4 +1,4 @@
-import { getRegisterIndex } from '../registers';
+import { getRegisterIndex } from '@/service/registers';
 import { AnalyzedInstruction, Result } from './types';
 
 export function assemble(inst: AnalyzedInstruction): number {

@@ -1,9 +1,8 @@
 <script setup lang="ts">
-import { ref } from 'vue';
-import { useSettingsStore } from '../stores/settings';
-import { useMemoryStore } from '../stores/memory';
-import { useRegistersStore } from '../stores/registers';
-import { useCodeStore } from '../stores/code';
+import { useSettingsStore } from '@/stores/settings';
+import { useMemoryStore } from '@/stores/memory';
+import { useRegistersStore } from '@/stores/registers';
+import { useCodeStore } from '@/stores/code';
 
 const settings = useSettingsStore();
 const memory = useMemoryStore();
@@ -36,11 +35,11 @@ function redo() {
             <option value="10">Decimal</option>
             <option value="16">Hexadecimal</option>
         </select>
-        <button @click="code.assemble()">Assemle</button>
+        <button @click="code.assemble()">Assemble</button>
         <button @click="undo">Undo</button>
         <button @click="redo">Redo</button>
         <button @click="junk">Junk</button>
-        <button @click="reset">Flash</button>
+        <button @click="reset">Clear</button>
     </div>
 </template>
 

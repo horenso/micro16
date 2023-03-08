@@ -1,6 +1,6 @@
 export function formatNumber(
     number: number,
-    base: 2 | 10 | 16 = 2,
+    base: number = 2,
     bits: number = 16
 ): string {
     if (number === undefined) {
@@ -8,24 +8,26 @@ export function formatNumber(
     }
     switch (base) {
         case 2:
-            return trancate(number >>> 0, bits)
+            return truncate(number >>> 0, bits)
                 .toString(2)
                 .padStart(bits, '0');
         case 16:
-            return trancate(number >>> 0, bits)
+            return truncate(number >>> 0, bits)
                 .toString(16)
                 .toUpperCase()
                 .padStart(bits / 4, '0');
-        default: // base 10
+        case 10: // base 10
             return number.toString(base);
+        default:
+            return '?';
     }
 }
 
-function trancate(number: number, bits: number) {
-    let trancation = -1;
+function truncate(number: number, bits: number) {
+    let truncation = -1;
     if (bits < 32) {
-        trancation = (1 << bits) - 1;
-        return number & trancation;
+        truncation = (1 << bits) - 1;
+        return number & truncation;
     }
     return number;
 }

@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import { useCodeStore } from '../stores/code';
 import { ref } from 'vue';
-import { Token } from '../service/assembler/token';
+import { useCodeStore } from '@/stores/code';
+import { Token } from '@/service/assembler/token';
 
 const codeStore = useCodeStore();
 

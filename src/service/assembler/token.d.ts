@@ -1,4 +1,4 @@
-import { Location } from './register';
+import { Location } from '@/register';
 
 type SimpleToken = {
     type: 'GOTO' | 'IF' | 'L_PAREN' | 'R_PAREN' | 'ARROW';

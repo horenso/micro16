@@ -1,8 +1,8 @@
-import { assemble } from './assembler/assembler';
-import { Ok, Result } from './assembler/types';
-import { parse } from './assembler/parser';
-import { lex } from './assembler/lexer';
-import { analyze } from './assembler/analyzer';
+import { assemble } from '@/service/assembler/assembler';
+import { Ok, Result } from '@/service/assembler/types';
+import { parse } from '@/service/assembler/parser';
+import { lex } from '@/service/assembler/lexer';
+import { analyze } from '@/service/assembler/analyzer';
 
 export function assembleLine(line: string): Result<number> {
     const mode = import.meta.env.MODE;
