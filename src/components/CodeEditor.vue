@@ -49,7 +49,6 @@ function getSpan(className: string, text: string): string {
 
 function highlightCode(code: string): string {
     let highlightedCode = '';
-    console.log(codeStore.tokenizedLines);
     for (let line of codeStore.tokenizedLines) {
         for (let token of line) {
             switch (token.type) {
