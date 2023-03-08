@@ -3,8 +3,10 @@ import { useSettingsStore } from '@/stores/settings';
 import { useMemoryStore } from '@/stores/memory';
 import { useRegistersStore } from '@/stores/registers';
 import { useCodeStore } from '@/stores/code';
+import { useCpuStore } from '@/stores/cpu';
 
 const settings = useSettingsStore();
+const cpu = useCpuStore();
 const memory = useMemoryStore();
 const registers = useRegistersStore();
 const code = useCodeStore();
@@ -17,6 +19,7 @@ function junk() {
 function reset() {
     memory.$reset();
     registers.$reset();
+    cpu.$reset();
 }
 
 function undo() {
@@ -25,6 +28,10 @@ function undo() {
 
 function redo() {
     console.log('redo');
+}
+
+function step() {
+    cpu.runInstruction();
 }
 </script>
 
@@ -35,11 +42,12 @@ function redo() {
             <option value="10">Decimal</option>
             <option value="16">Hexadecimal</option>
         </select>
-        <button @click="code.assemble()">Assemble</button>
+        <button @click="code.assemble">Assemble</button>
         <button @click="undo">Undo</button>
         <button @click="redo">Redo</button>
         <button @click="junk">Junk</button>
-        <button @click="reset">Clear</button>
+        <button @click="reset">Reset</button>
+        <button @click="step">Step</button>
     </div>
 </template>
 

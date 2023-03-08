@@ -1,2 +1,2 @@
 -) Add labels :bla and .bla to assembler
--) 
+-) Narrow type of DisassembledInstruction bus{A,B,S} to 1 | 2 ... 14 | 15

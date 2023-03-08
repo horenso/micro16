@@ -1,5 +1,4 @@
 import { defineStore } from 'pinia';
-import { e } from 'vitest/dist/index-50755efe';
 
 export const REGISTER_NAMES = [
     'PC',
@@ -20,7 +19,7 @@ export const REGISTER_COUNT = REGISTER_NAMES.length;
 
 export const useRegistersStore = defineStore('registers', {
     state: () => ({
-        registers: new Int16Array(14),
+        registers: new Int16Array(13),
     }),
     getters: {
         at: (state) => {
@@ -38,12 +37,19 @@ export const useRegistersStore = defineStore('registers', {
         },
     },
     actions: {
-        junk() {
+        junk(): void {
             const newRegisters = new Int16Array(REGISTER_COUNT);
             for (let i = 0; i < REGISTER_COUNT; i++) {
                 newRegisters[i] = Math.floor(Math.random() * (2 ** 16 - 1));
             }
             this.registers = newRegisters;
+        },
+        set(index: number, newValue: number): void {
+            if (index < 0 || index > 13) {
+                console.log('Invalid SET of register!', index);
+                return;
+            }
+            this.registers[index] = newValue;
         },
     },
 });
