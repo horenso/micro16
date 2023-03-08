@@ -95,7 +95,7 @@ function highlightCode(code: string): string {
                     class="line-number"
                 >
                     <input type="checkbox" class="breakpoint" />
-                    <span class="line-number-text">{{ i + 1 }}</span>
+                    <span class="line-number-text">{{ i }}</span>
                 </div>
             </div>
             <div class="code-area">

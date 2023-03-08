@@ -64,7 +64,7 @@ export const useCodeStore = defineStore('code', {
                 const result = assembleLine(line);
                 if (!result.ok) {
                     this.errors.push({
-                        lineNumber: i + 1,
+                        lineNumber: i,
                         errorMessage: result.errorMessage,
                     });
                 } else {
