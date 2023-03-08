@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { useCodeStore } from '../stores/code';
-import { reactive, ref } from 'vue';
-import { lex } from '../service/assembler/lexer';
+import { ref } from 'vue';
 import { Token } from '../service/assembler/token';
 
 const codeStore = useCodeStore();
@@ -13,10 +12,13 @@ const tokenizedLines: Token[][] = [];
 
 function onInput(event: Event) {
     const target = event.target as HTMLInputElement;
-    codeStore.code = target.value;
+    codeStore.setCode(target.value);
+}
+
+codeStore.$subscribe(() => {
     const res = highlightCode(codeStore.code);
     (codeOverlayRef.value as HTMLPreElement).innerHTML = res;
-}
+});
 
 function onTab() {
     if (textareaRef.value === undefined) {
@@ -47,7 +49,7 @@ function getSpan(className: string, text: string): string {
 
 function highlightCode(code: string): string {
     let highlightedCode = '';
-    console.log(codeStore.tokenizedLines)
+    console.log(codeStore.tokenizedLines);
     for (let line of codeStore.tokenizedLines) {
         for (let token of line) {
             switch (token.type) {
@@ -55,23 +57,23 @@ function highlightCode(code: string): string {
                 case 'IF':
                 case 'FUNCTION':
                 case 'LOCATION':
-                    highlightedCode += getSpan("keyword", token.text);
+                    highlightedCode += getSpan('keyword', token.text);
                     break;
                 case 'ARROW':
                 case 'UNARY_OPERATOR':
                 case 'BINARY_OPERATOR':
                 case 'L_PAREN':
                 case 'R_PAREN':
-                    highlightedCode += getSpan("punctuation", token.text);
+                    highlightedCode += getSpan('punctuation', token.text);
                     break;
                 case 'COMMENT':
-                    highlightedCode += getSpan("comment", token.text);
+                    highlightedCode += getSpan('comment', token.text);
                     break;
                 case 'GARBAGE':
-                    highlightedCode += getSpan("garbage", token.text);
+                    highlightedCode += getSpan('garbage', token.text);
                     break;
                 case 'JUMP_ADDRESS':
-                    highlightedCode += getSpan("number", token.text);
+                    highlightedCode += getSpan('number', token.text);
                     break;
                 default:
                     highlightedCode += token.text;
@@ -85,18 +87,30 @@ function highlightCode(code: string): string {
 </script>
 
 <template>
-    <h1>Coding Editor</h1>
     <div class="wrapper">
         <div class="editor">
             <div class="line-numbers">
-                <div v-for="(line, i) in codeStore.code.split('\n')" :key="i" class="line-number">
+                <div
+                    v-for="(line, i) in codeStore.code.split('\n')"
+                    :key="i"
+                    class="line-number"
+                >
                     <input type="checkbox" class="breakpoint" />
                     <span class="line-number-text">{{ i + 1 }}</span>
                 </div>
             </div>
             <div class="code-area">
-                <textarea wrap="off" ref="textareaRef" spellcheck="false" class="code-textarea" :value="codeStore.code"
-                    rows="10" @input="onInput" @keydown.tab.prevent="onTab" @scroll="onScroll"></textarea>
+                <textarea
+                    wrap="off"
+                    ref="textareaRef"
+                    spellcheck="false"
+                    class="code-textarea"
+                    :value="codeStore.code"
+                    rows="10"
+                    @input="onInput"
+                    @keydown.tab.prevent="onTab"
+                    @scroll="onScroll"
+                ></textarea>
                 <pre class="code-overlay" ref="codeOverlayRef"></pre>
             </div>
         </div>
@@ -109,11 +123,11 @@ function highlightCode(code: string): string {
 <!-- Syntax highlighting classes: -->
 <style>
 .keyword {
-    color: rgb(86, 146, 129);
+    color: #a72f2f;
 }
 
 .punctuation {
-    color: rgb(129, 88, 35);
+    color: #007b0d;
 }
 
 .comment {
@@ -125,18 +139,23 @@ function highlightCode(code: string): string {
 }
 
 .number {
-    color: rgb(57, 92, 0);
+    color: #003eaa;
 }
 </style>
 
 <style scoped>
+.wrapper > * {
+    font-family: 'Verdana,sans-serif', monospace;
+    font-size: 1.5rem;
+    /* box-sizing: border-box; */
+}
+
 .wrapper {
     margin: 0 1em 0 1em;
     display: grid;
     grid-template-columns: 1fr 1fr;
     justify-items: stretch;
     gap: 1em;
-    line-height: 1em;
     padding: 1em;
     min-height: 10em;
 }
@@ -145,8 +164,7 @@ function highlightCode(code: string): string {
     outline: 1px solid black;
     display: flex;
     flex-direction: row;
-    font-family: 'Courier New', monospace;
-    gap: 10px;
+    gap: 1em;
 }
 
 .line-numbers {
@@ -157,23 +175,21 @@ function highlightCode(code: string): string {
 
 .line-number {
     display: flex;
+    padding: 0 0.5em 0 0.5em;
     align-items: center;
-    text-align: right;
-    width: 3em;
-    padding-left: 0.3em;
 }
 
 .breakpoint {
     margin: 0;
+    margin-right: 0.3em;
     appearance: none;
     -webkit-appearance: none;
     -moz-appearance: none;
     border-radius: 50%;
     background-color: #282a3a;
 
-    /* Slightly smaller than the line */
-    height: 0.8em;
-    width: 0.8em;
+    height: 1em;
+    width: 1em;
 }
 
 .breakpoint:hover {
@@ -185,7 +201,8 @@ function highlightCode(code: string): string {
 }
 
 .line-number-text {
-    flex: 1;
+    text-align: right;
+    flex-grow: 1;
 
     /* Not selectable: */
     -webkit-touch-callout: none;
@@ -209,20 +226,16 @@ function highlightCode(code: string): string {
     resize: none;
     padding: 0;
     margin: 0;
-    line-height: inherit;
     height: 100%;
     color: transparent;
+    font-size: inherit;
     background: transparent;
     caret-color: rgb(0, 0, 0);
 }
 
 .code-textarea::selection {
     color: transparent;
-    background-color: rgba(91, 116, 255, 0.548);
-}
-
-.code-area>* {
-    line-height: inherit;
+    background-color: #5b74ff8c;
 }
 
 .code-overlay {
@@ -240,6 +253,5 @@ function highlightCode(code: string): string {
 .assembled-code {
     outline: 1px solid black;
     white-space: pre;
-    font-family: 'Courier New', monospace;
 }
 </style>

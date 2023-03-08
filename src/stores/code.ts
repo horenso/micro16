@@ -3,51 +3,79 @@ import { assembleLine } from '../service/assembling';
 import { formatNumber } from '../service/formatting';
 import { useSettingsStore } from './settings';
 import { lexNeverFail } from '../service/assembler/lexer';
+import { Token } from '../service/assembler/token';
+
+interface ErrorReport {
+    lineNumber: number;
+    errorMessage: string;
+}
+
+interface CodeState {
+    code: string;
+    assembledCode: number[];
+    // Whether the code has been edited since last assembling.
+    isDirty: boolean;
+    errors: ErrorReport[];
+}
 
 export const useCodeStore = defineStore('code', {
-    state: () => ({
+    state: (): CodeState => ({
         code: '',
-        isDirty: true,
         assembledCode: [],
-        tokenLines: [],
+        isDirty: false,
+        errors: [],
     }),
     getters: {
-        tokenizedLines: (state) => {
+        tokenizedLines: (state): Token[][] => {
             return state.code.split('\n').map((l) => lexNeverFail(l));
         },
-        assembledCodeString: (state) => {
+        assembledCodeString: (state): string => {
+            if (state.errors.length > 0) {
+                return state.errors
+                    .map((e) => `${e.lineNumber}: ${e.errorMessage}`)
+                    .join('\n');
+            }
+            if (state.isDirty) {
+                return 'Code changed - please Assemble';
+            }
             return state.assembledCode
-                .map((code) => {
-                    if (typeof code === 'string') {
-                        return code;
-                    } else {
-                        return formatNumber(
-                            code,
-                            useSettingsStore().numberSystem as 2 | 10 | 16,
-                            32
-                        );
-                    }
-                })
+                .map((code) =>
+                    formatNumber(
+                        code,
+                        useSettingsStore().numberSystem as 2 | 10 | 16,
+                        32
+                    )
+                )
                 .join('\n');
         },
     },
     actions: {
-        assemble() {
-            if (this.code === '') {
-                this.assembledCode = [];
-                return;
-            }
-            let newAssembledCode: any = [];
+        setCode(newCode: string): void {
+            this.code = newCode;
+            this.assembledCode = [];
+            this.isDirty = true;
+        },
+        assemble(): void {
+            let newAssembledCode: number[] = [];
             const lines = this.code.split('\n');
-            lines.forEach((line) => {
+            for (let i = 0; i < lines.length; ++i) {
+                const line = lines[i];
                 const result = assembleLine(line);
-                if (result.ok) {
-                    newAssembledCode.push(result.result);
+                if (!result.ok) {
+                    this.errors.push({
+                        lineNumber: i + 1,
+                        errorMessage: result.errorMessage,
+                    });
                 } else {
-                    newAssembledCode.push(result.errorMessage);
+                    newAssembledCode.push(result.result);
                 }
-            });
-            this.assembledCode = newAssembledCode;
+            }
+            this.isDirty = false;
+            if (this.errors.length > 0) {
+                this.assembledCode = [];
+            } else {
+                this.assembledCode = newAssembledCode;
+            }
         },
     },
 });
