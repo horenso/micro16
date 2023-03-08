@@ -57,6 +57,7 @@ export const useCodeStore = defineStore('code', {
         },
         assemble(): void {
             let newAssembledCode: number[] = [];
+            this.errors = [];
             const lines = this.code.split('\n');
             for (let i = 0; i < lines.length; ++i) {
                 const line = lines[i];
