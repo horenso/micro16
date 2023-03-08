@@ -1,5 +1,4 @@
 import { getRegisterIndex } from '@/service/registers';
-import { Result } from '@/service/result-type';
 import { AnalyzedInstruction } from './types';
 
 export function assemble(inst: AnalyzedInstruction): number {
@@ -40,9 +39,6 @@ export function assemble(inst: AnalyzedInstruction): number {
     result |= getRegisterIndex(inst.busA) << 8;
     result |= getRegisterIndex(inst.busB) << 12;
     result |= getRegisterIndex(inst.busS) << 16;
-    if (inst.busS !== 'ZERO') {
-        result |= 0x0010_0000; // ENS
-    }
 
     if (inst.marFlag) {
         result |= 0x0080_0000;
@@ -52,6 +48,9 @@ export function assemble(inst: AnalyzedInstruction): number {
     }
     if (inst.aMuxFlag) {
         result |= 0x8000_0000;
+    }
+    if (inst.ensFlag) {
+        result |= 0x0010_0000;
     }
 
     return result & -1;

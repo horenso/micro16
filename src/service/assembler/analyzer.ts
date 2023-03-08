@@ -230,6 +230,7 @@ export class Analyzer {
             marFlag: this.mar,
             mbrFlag: this.mbr,
             aMuxFlag: this.aMux,
+            ensFlag: this.busS !== undefined,
             jump: this.instruction.jump,
             readWrite: this.instruction.readWrite,
         });

@@ -1,27 +1,28 @@
 import { test, expect } from 'vitest';
-import { assembleLine } from './assembling';
+import { ParsedInstruction } from './assembler/types';
+import { assembleLine, disassmble } from './assembling';
 
 function testAssembleSuccess(line: string, result: number) {
     expect(assembleLine(line)).toMatchObject({ ok: true, result: result & -1 });
 }
 
-function testAssemblingError(line: string) {
+function testAssembleError(line: string) {
     expect(assembleLine(line)).toMatchObject({ ok: false });
 }
 
 test('Read/Write', () => {
     testAssembleSuccess('wr', 0x0020_0000);
     testAssembleSuccess('rd', 0x0060_0000);
-    testAssemblingError('rd;rd');
-    testAssemblingError('wr;rd');
-    testAssemblingError('wr;wr');
+    testAssembleError('rd;rd');
+    testAssembleError('wr;rd');
+    testAssembleError('wr;wr');
 });
 
 test('Jumps', () => {
     testAssembleSuccess(';;goto 4;', 0x6000_0004);
     testAssembleSuccess('goto   255;;', 0x6000_00ff);
-    testAssemblingError('goto -1');
-    testAssemblingError('goto 256');
+    testAssembleError('goto -1');
+    testAssembleError('goto 256');
     testAssembleSuccess('if N goto 50', 0x2000_0032);
     testAssembleSuccess('if Z goto 50', 0x4000_0032);
     testAssembleSuccess('(R1); if Z goto 30', 0x4000_051e);
@@ -49,8 +50,8 @@ test('Multiple registers', () => {
 
 test('Edge cases', () => {
     testAssembleSuccess('MBR<-MBR', 0x8100_0000); // MBR can be assigned to MBR
-    testAssemblingError('R1 <- 1~1'); // ~ takes only one operand
-    testAssemblingError('MAR <- MBR'); // "MBR cannot be used as input for MAR."
+    testAssembleError('R1 <- 1~1'); // ~ takes only one operand
+    testAssembleError('MAR <- MBR'); // "MBR cannot be used as input for MAR."
 });
 
 test('Multiplication Example', () => {

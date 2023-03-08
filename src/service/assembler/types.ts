@@ -57,6 +57,21 @@ export interface AnalyzedInstruction {
     marFlag: boolean;
     mbrFlag: boolean;
     aMuxFlag: boolean;
+    ensFlag: boolean;
+    jump?: Jump;
+    readWrite?: 'rd' | 'wr';
+}
+
+export interface DisassembledInstruction {
+    busA: number;
+    busB: number;
+    busS: number;
+    operator?: Operator;
+    shift?: Shift;
+    marFlag: boolean;
+    mbrFlag: boolean;
+    aMuxFlag: boolean;
+    ensFlag: boolean;
     jump?: Jump;
     readWrite?: 'rd' | 'wr';
 }

@@ -16,4 +16,7 @@ export const useCpuStore = defineStore('cpu', {
         B: 0,
         S: 0,
     }),
+    actions: {
+        runInstruction(inst: number) {},
+    },
 });
