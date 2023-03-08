@@ -75,9 +75,9 @@ class Lexer {
                         text: match,
                     });
                 }
+                this.advance(match.length);
+                return true;
             }
-            this.advance(match.length);
-            return true;
         }
         const address = parseInt(match, 10);
         if (address > 255) {

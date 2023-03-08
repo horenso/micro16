@@ -21,6 +21,18 @@ test('1+1', () => {
     expect(lex(input)).toMatchObject(expected);
 });
 
+test('goto 1', () => {
+    const input = 'goto 1';
+    const expected: Result<Token[]> = Ok([
+        {
+            type: 'GOTO',
+            text: 'goto',
+        },
+        { type: 'JUMP_ADDRESS', number: 1, text: '1' },
+    ]);
+    expect(lex(input)).toMatchObject(expected);
+});
+
 test('Basic addition of two registers.', () => {
     const input = 'R1 <- R2 + R3; rd';
     const expected: Result<Token[]> = Ok([
