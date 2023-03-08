@@ -1,14 +1,10 @@
 import { isReadable, isWritable } from '@/service/registers';
+import { Result, Ok, EmptyOk, EmptyResult, Err } from '@/service/result-type';
 import {
-    EmptyOk,
-    EmptyResult,
-    Err,
     Expression,
     Jump,
-    Ok,
     Operation,
     ParsedInstruction,
-    Result,
     Statement,
 } from './types';
 import { lex } from './lexer';

@@ -1,5 +1,5 @@
+import { Ok, Result } from '@/service/result-type';
 import { assemble } from '@/service/assembler/assembler';
-import { Ok, Result } from '@/service/assembler/types';
 import { parse } from '@/service/assembler/parser';
 import { lex } from '@/service/assembler/lexer';
 import { analyze } from '@/service/assembler/analyzer';

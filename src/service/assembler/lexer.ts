@@ -1,5 +1,5 @@
 import { isLocation } from '@/service/registers';
-import { Result, Ok, Err } from './types';
+import { Result, Ok, Err } from '@/service/result-type';
 import { Token } from './token';
 
 export function lex(line: string): Result<Token[]> {

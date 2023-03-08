@@ -1,5 +1,5 @@
 import { expect, test } from 'vitest';
-import { Result, Ok } from './types';
+import { Result, Ok } from '@/service/result-type';
 import { lex } from './lexer';
 import { Token } from './token';
 

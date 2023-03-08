@@ -1,5 +1,6 @@
 import { getRegisterIndex } from '@/service/registers';
-import { AnalyzedInstruction, Result } from './types';
+import { Result } from '@/service/result-type';
+import { AnalyzedInstruction } from './types';
 
 export function assemble(inst: AnalyzedInstruction): number {
     let result = 0;

@@ -1,15 +1,11 @@
 import { RegisterOrConstant } from '@/service/registers';
+import { EmptyResult, Ok, Result, EmptyOk, Err } from '@/service/result-type';
 import {
     ParsedInstruction,
-    EmptyResult,
-    Err,
     Operator,
-    EmptyOk,
     Shift,
     Statement,
-    Result,
     AnalyzedInstruction,
-    Ok,
 } from './types';
 
 export function analyze(inst: ParsedInstruction): Result<AnalyzedInstruction> {

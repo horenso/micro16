@@ -1,6 +1,7 @@
 import { expect, test } from 'vitest';
+import { Result, Ok } from '@/service/result-type';
 import { parseLine } from './parser';
-import { Result, ParsedInstruction, Ok } from './types';
+import { ParsedInstruction } from './types';
 
 test('Simple addition', () => {
     const instruction = 'R1 <- R2 + R3';
