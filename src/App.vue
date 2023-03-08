@@ -8,8 +8,8 @@ import CodeEditor from '@/components/CodeEditor.vue';
 <template>
     <Toolbar />
     <CodeEditor />
-    <Memory />
     <Registers />
+    <Memory />
 </template>
 
 <style scoped></style>

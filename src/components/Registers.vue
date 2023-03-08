@@ -1,14 +1,16 @@
 <script setup lang="ts">
 import { formatNumber } from '@/service/formatting';
+import { useCpuStore } from '@/stores/cpu';
 import { useRegistersStore, REGISTER_NAMES } from '@/stores/registers';
 import { useSettingsStore } from '@/stores/settings';
 
 const settings = useSettingsStore();
 const registers = useRegistersStore();
+const cpu = useCpuStore();
 </script>
 
 <template>
-    <h1>Registers</h1>
+    {{ cpu.$state }}
     <table>
         <tr>
             <th>Register</th>
