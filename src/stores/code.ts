@@ -2,8 +2,7 @@ import { defineStore } from 'pinia';
 import { assembleLine } from '../service/assembling';
 import { formatNumber } from '../service/formatting';
 import { useSettingsStore } from './settings';
-import { lex, lexNeverFail } from '../service/assembler/lexer';
-import { Token } from '../service/assembler/token';
+import { lexNeverFail } from '../service/assembler/lexer';
 
 export const useCodeStore = defineStore('code', {
     state: () => ({
@@ -22,7 +21,6 @@ export const useCodeStore = defineStore('code', {
                     if (typeof code === 'string') {
                         return code;
                     } else {
-                        console.log(code);
                         return formatNumber(
                             code,
                             useSettingsStore().numberSystem as 2 | 10 | 16,
@@ -50,7 +48,6 @@ export const useCodeStore = defineStore('code', {
                 }
             });
             this.assembledCode = newAssembledCode;
-            console.log(this.assembledCode);
         },
     },
 });

@@ -30,6 +30,7 @@ test('Jumps', () => {
 });
 
 test('Calculations', () => {
+    testAssembleSuccess('1 + 1', 0x0800_1100);
     testAssembleSuccess('R1 <- 0', 0x0015_0000);
     testAssembleSuccess('R3 <- 1', 0x0017_0100);
     testAssembleSuccess('AC <- -1', 0x001f_0200);

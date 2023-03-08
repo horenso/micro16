@@ -54,39 +54,40 @@ class Lexer {
         }
         const match = numberMatch[0];
 
-        // This could arguably be done in the Parser,
-        // but since it's so simple we'll do it here.
-        // '0' or '1' are locations expect when
-        // the previous token is 'goto', then
-        // they are jump addresses.
-        const previousToken = this.getPreviousToken();
-        if (previousToken === undefined || previousToken.type === 'GOTO') {
-            const address = parseInt(match, 10);
-            if (address > 255) {
-                return false;
+        if (match === '0' || match === '1') {
+            // This could arguably be done in the Parser,
+            // but since it's so simple we'll do it here.
+            // '0' or '1' are locations expect when
+            // the previous token is 'goto', then
+            // they are jump addresses.
+            const previousToken = this.getPreviousToken();
+            if (previousToken?.type !== 'GOTO') {
+                if (match === '0') {
+                    this.result.push({
+                        type: 'LOCATION',
+                        location: 'ZERO',
+                        text: match,
+                    });
+                } else {
+                    this.result.push({
+                        type: 'LOCATION',
+                        location: 'ONE',
+                        text: match,
+                    });
+                }
             }
-            this.result.push({
-                type: 'JUMP_ADDRESS',
-                number: address,
-                text: match,
-            });
-        } else {
-            if (match === '0') {
-                this.result.push({
-                    type: 'LOCATION',
-                    location: 'ZERO',
-                    text: match,
-                });
-            } else if (match === '1') {
-                this.result.push({
-                    type: 'LOCATION',
-                    location: 'ONE',
-                    text: match,
-                });
-            } else {
-                return false;
-            }
+            this.advance(match.length);
+            return true;
         }
+        const address = parseInt(match, 10);
+        if (address > 255) {
+            return false;
+        }
+        this.result.push({
+            type: 'JUMP_ADDRESS',
+            number: address,
+            text: match,
+        });
         this.advance(match.length);
         return true;
     }
