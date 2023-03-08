@@ -1,5 +1,4 @@
 import { defineStore } from 'pinia';
-import { e } from 'vitest/dist/index-50755efe';
 
 export const REGISTER_NAMES = [
     'PC',
