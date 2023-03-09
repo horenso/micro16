@@ -3,6 +3,7 @@ import { assembleLine } from '@/service/assembling';
 import { formatNumber } from '@/service/formatting';
 import { useSettingsStore } from '@/stores/settings';
 import { lexNeverFail } from '@/service/assembler/lexer';
+import { useCpuStore } from './cpu';
 
 interface ErrorReport {
     lineNumber: number;
@@ -103,7 +104,9 @@ export const useCodeStore = defineStore('code', {
                             break;
                     }
                 }
-                const isActiveLine = state.activeLineIndex === index;
+                const CpuStore = useCpuStore();
+                const isActiveLine =
+                    CpuStore.isActivated && CpuStore.MIC === index;
                 if (isActiveLine) {
                     highlightedCode += getSpan(
                         'active-line',

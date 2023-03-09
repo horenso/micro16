@@ -3,13 +3,29 @@ import Toolbar from '@/components/Toolbar.vue';
 import Memory from '@/components/Memory.vue';
 import Registers from '@/components/Registers.vue';
 import CodeEditor from '@/components/CodeEditor.vue';
+import { useCpuStore } from './stores/cpu';
+import { useRegistersStore } from './stores/registers';
+
+const cpuStore = useCpuStore();
+const registersStore = useRegistersStore();
 </script>
 
 <template>
     <Toolbar />
     <CodeEditor />
-    <Registers />
-    <Memory />
+    <div class="grid-container">
+        <div class="grid-item"><Registers /></div>
+        <div class="grid-item"><Memory /></div>
+    </div>
+    {{ cpuStore.$state }}
 </template>
 
-<style scoped></style>
+<style scoped>
+.grid-container {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+}
+.grid-item {
+    display: inline;
+}
+</style>

@@ -11,6 +11,7 @@ interface CpuStore {
     S: number;
     MIC: number;
     MIR: number;
+    isActivated: boolean;
 }
 
 export const useCpuStore = defineStore('cpu', {
@@ -22,9 +23,20 @@ export const useCpuStore = defineStore('cpu', {
         S: 0,
         MIC: 0,
         MIR: 0,
+        isActivated: false,
     }),
     actions: {
+        activate() {
+            const code = useCodeStore();
+            this.isActivated = !code.isDirty && code.code !== ''
+        },
+        deactivate() {
+            this.isActivated = false;
+        },
         runInstruction() {
+            if (!this.isActivated) {
+                return;
+            }
             const registers = useRegistersStore();
             const code = useCodeStore();
 

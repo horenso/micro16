@@ -1,6 +1,9 @@
 import { defineStore } from 'pinia';
 
 export const REGISTER_NAMES = [
+    '0',
+    '1',
+    '-1',
     'PC',
     'R0',
     'R1',
@@ -15,41 +18,58 @@ export const REGISTER_NAMES = [
     'R10',
     'AC',
 ];
+
+const STORED_VALUES = 13;
+
+function getRegisterValue(index: number, data: Int16Array): number {
+    if (index === 0) {
+        return 0;
+    } else if (index === 1) {
+        return 1;
+    } else if (index === 2) {
+        return -1;
+    } else {
+        return data[index - 3];
+    }
+}
+
 export const REGISTER_COUNT = REGISTER_NAMES.length;
 
 export const useRegistersStore = defineStore('registers', {
     state: () => ({
-        registers: new Int16Array(13),
+        registers: new Int16Array(STORED_VALUES),
     }),
     getters: {
         at: (state) => {
-            return (index: number) => {
-                if (index === 0) {
-                    return 0;
-                } else if (index === 1) {
-                    return 1;
-                } else if (index === 2) {
-                    return -1;
-                } else {
-                    return state.registers[index + 3];
-                }
-            };
+            return (index: number) => getRegisterValue(index, state.registers);
+        },
+        all: (state): [string, number][] => {
+            const collection: [string, number][] = [];
+            for (let i = 0; i < 16; i++) {
+                collection.push([
+                    REGISTER_NAMES[i],
+                    getRegisterValue(i, state.registers),
+                ]);
+            }
+            return collection;
         },
     },
     actions: {
         junk(): void {
-            const newRegisters = new Int16Array(REGISTER_COUNT);
+            const newRegisters = new Int16Array(STORED_VALUES);
             for (let i = 0; i < REGISTER_COUNT; i++) {
                 newRegisters[i] = Math.floor(Math.random() * (2 ** 16 - 1));
             }
             this.registers = newRegisters;
         },
         set(index: number, newValue: number): void {
-            if (index < 0 || index > 13) {
+            const newRegisters: Int16Array = Int16Array.from(this.registers);
+            if (index < 3 || index > 15) {
                 console.log('Invalid SET of register!', index);
                 return;
             }
-            this.registers[index] = newValue;
+            newRegisters[index - 3] = newValue;
+            this.registers = newRegisters;
         },
     },
 });

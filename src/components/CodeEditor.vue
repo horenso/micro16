@@ -1,11 +1,23 @@
 <script setup lang="ts">
 import { ref } from 'vue';
 import { useCodeStore } from '@/stores/code';
+import { useCpuStore } from '@/stores/cpu';
+import { storeToRefs } from 'pinia';
 
 const codeStore = useCodeStore();
+const cpuStore = useCpuStore();
 
 const textareaRef = ref<HTMLTextAreaElement>();
 const codeOverlayRef = ref<HTMLPreElement>();
+
+const { isActivated, MIC } = storeToRefs(cpuStore);
+
+function isActiveLine(index: number): boolean {
+    if (!isActivated.value || MIC.value > codeStore.assembledCode.length - 1) {
+        return false;
+    }
+    return MIC.value === index;
+}
 
 function onInput(event: Event) {
     const target = event.target as HTMLInputElement;
@@ -49,8 +61,7 @@ function onScroll() {
                     <span
                         class="line-number-text"
                         :class="{
-                            'line-number-selected':
-                                codeStore.activeLineIndex === i,
+                            'line-number-selected': isActiveLine(i),
                         }"
                         >{{ i }}</span
                     >
@@ -80,8 +91,7 @@ function onScroll() {
                 v-for="(line, i) in codeStore.assembledCodeString.split('\n')"
                 class="assembled-code-line"
                 :class="{
-                    'assembled-code-line-active':
-                        codeStore.activeLineIndex === i,
+                    'assembled-code-line-active': isActiveLine(i),
                 }"
             >
                 {{ line }}

@@ -38,7 +38,6 @@ function scrollDown(event) {
 </script>
 
 <template>
-    <h1>Memory</h1>
     Jump to:
     <input
         type="number"

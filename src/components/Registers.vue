@@ -3,23 +3,22 @@ import { formatNumber } from '@/service/formatting';
 import { useCpuStore } from '@/stores/cpu';
 import { useRegistersStore, REGISTER_NAMES } from '@/stores/registers';
 import { useSettingsStore } from '@/stores/settings';
+import { storeToRefs } from 'pinia';
 
-const settings = useSettingsStore();
-const registers = useRegistersStore();
-const cpu = useCpuStore();
+const { all } = storeToRefs(useRegistersStore());
+const settingsStore = useSettingsStore();
 </script>
 
 <template>
-    {{ cpu.$state }}
     <table>
         <tr>
             <th>Register</th>
             <th>Value</th>
         </tr>
-        <tr v-for="(number, index) in registers.registers">
-            <td>{{ REGISTER_NAMES[index] }}</td>
+        <tr v-for="tuple of all">
+            <td>{{ tuple[0] }}</td>
             <td class="numberValue">
-                {{ formatNumber(number, settings.numberSystem) }}
+                {{ formatNumber(tuple[1], settingsStore.numberSystem) }}
             </td>
         </tr>
     </table>
@@ -32,5 +31,9 @@ td {
     border: 1px solid black;
     border-collapse: collapse;
     font-family: 'Courier New', monospace;
+}
+
+table {
+    margin: 1em;
 }
 </style>

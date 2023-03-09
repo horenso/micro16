@@ -4,6 +4,7 @@ import { useMemoryStore } from '@/stores/memory';
 import { useRegistersStore } from '@/stores/registers';
 import { useCodeStore } from '@/stores/code';
 import { useCpuStore } from '@/stores/cpu';
+import { createPinia } from 'pinia';
 
 const settings = useSettingsStore();
 const cpu = useCpuStore();
@@ -20,6 +21,15 @@ function reset() {
     memory.$reset();
     registers.$reset();
     cpu.$reset();
+}
+
+function toggleCpu() {
+    if (!cpu.isActivated) {
+        cpu.$reset();
+        cpu.activate();
+    } else {
+        cpu.deactivate();
+    }
 }
 
 function undo() {
@@ -47,7 +57,10 @@ function step() {
         <button @click="redo">Redo</button>
         <button @click="junk">Junk</button>
         <button @click="reset">Reset</button>
-        <button @click="step">Step</button>
+        <button @click="toggleCpu">
+            {{ cpu.isActivated ? 'Turn off' : 'Turn on' }}
+        </button>
+        <button @click="step" :disabled="!cpu.isActivated">Step</button>
     </div>
 </template>
 
