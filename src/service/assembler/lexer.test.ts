@@ -3,9 +3,17 @@ import { Result, Ok } from '@/service/result-type';
 import { lex } from './lexer';
 import { Token } from './token';
 
+function testLexSuccess(input: string, expected: Token[]): void {
+    expect(lex(input)).toMatchObject(Ok(expected));
+}
+
+function testLexFail(input: string): void {
+    expect(lex(input)).toMatchObject({ ok: false });
+}
+
 test('1+1', () => {
     const input = '1 + 1';
-    const expected: Result<Token[]> = Ok([
+    const expected: Token[] = [
         {
             type: 'LOCATION',
             location: 'ONE',
@@ -17,25 +25,25 @@ test('1+1', () => {
             location: 'ONE',
             text: '1',
         },
-    ]);
-    expect(lex(input)).toMatchObject(expected);
+    ];
+    testLexSuccess(input, expected);
 });
 
 test('goto 1', () => {
     const input = 'goto 1';
-    const expected: Result<Token[]> = Ok([
+    const expected: Token[] = [
         {
             type: 'GOTO',
             text: 'goto',
         },
         { type: 'JUMP_ADDRESS', number: 1, text: '1' },
-    ]);
-    expect(lex(input)).toMatchObject(expected);
+    ];
+    testLexSuccess(input, expected);
 });
 
 test('Basic addition of two registers.', () => {
     const input = 'R1 <- R2 + R3; rd';
-    const expected: Result<Token[]> = Ok([
+    const expected: Token[] = [
         {
             type: 'LOCATION',
             location: 'R1',
@@ -58,13 +66,13 @@ test('Basic addition of two registers.', () => {
             readWrite: 'rd',
             text: 'rd',
         },
-    ]);
-    expect(lex(input)).toMatchObject(expected);
+    ];
+    testLexSuccess(input, expected);
 });
 
 test('Parentheses with shift.', () => {
     const input = 'R1 <- lsh(1+(-1))';
-    const expected: Result<Token[]> = Ok([
+    const expected: Token[] = [
         {
             type: 'LOCATION',
             location: 'R1',
@@ -102,14 +110,14 @@ test('Parentheses with shift.', () => {
             type: 'R_PAREN',
             text: ')',
         },
-    ]);
-    expect(lex(input)).toMatchObject(expected);
+    ];
+    testLexSuccess(input, expected);
 });
 
 test('1 vs ONE 0 vs ZERO', () => {
     // NOTE: This is just a lexer test, this wouldn't be a valid instruction.
     const input = 'R1 <- 0 + 1; goto 0; if N goto 1; R1 <- 1; wr';
-    const expected: Result<Token[]> = Ok([
+    const expected: Token[] = [
         {
             type: 'LOCATION',
             location: 'R1',
@@ -149,6 +157,27 @@ test('1 vs ONE 0 vs ZERO', () => {
             readWrite: 'wr',
             text: 'wr',
         },
-    ]);
-    expect(lex(input)).toMatchObject(expected);
+    ];
+    testLexSuccess(input, expected);
+});
+
+test('Labels', () => {
+    let input = ':HELLO';
+    let expected: Token[] = [
+        { type: 'LABEL_DEFINE', label: 'HELLO', text: ':HELLO' },
+    ];
+    testLexSuccess(input, expected);
+
+    input = 'if Z goto .HELLO';
+    expected = [
+        { type: 'IF', text: 'if' },
+        { type: 'CONDITION', condition: 'Z', text: 'Z' },
+        { type: 'GOTO', text: 'goto' },
+        { type: 'LABEL_TARGET', label: 'HELLO', text: '.HELLO' },
+    ];
+    testLexSuccess(input, expected);
+
+    // Label cannot start with a number
+    testLexFail(':32');
+    testLexFail('.32');
 });

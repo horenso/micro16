@@ -92,6 +92,30 @@ class Lexer {
         return true;
     }
 
+    private matchLabel(): boolean {
+        const labelMatch = this.line.match(/^(:|\.)(\w+)/);
+        if (labelMatch === null) {
+            return false;
+        }
+        const match = labelMatch[0];
+        const labelText = labelMatch[2];
+        if (labelText.match(/^[a-zA-Z]/) === null) {
+            return false;
+            // TODO: The structure right now doesn't allow me
+            //       to propagate the error "label start must be alphanumeric"
+        }
+        const labelType = labelMatch[1].startsWith(':')
+            ? 'LABEL_DEFINE'
+            : 'LABEL_TARGET';
+        this.result.push({
+            type: labelType,
+            label: labelText,
+            text: match,
+        });
+        this.advance(match.length);
+        return true;
+    }
+
     private matchLocationOrFunction(): boolean {
         // (-1) is only ever a register location, whereas
         // '1' could be a jump address or a operand.
@@ -152,6 +176,7 @@ class Lexer {
                 this.ignoreWhitespace() ||
                 this.matchLocationOrFunction() ||
                 this.matchPositiveNumber() ||
+                this.matchLabel() ||
                 this.matchExact('wr', {
                     type: 'READ_WRITE',
                     readWrite: 'wr',

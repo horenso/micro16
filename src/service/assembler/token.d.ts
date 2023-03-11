@@ -47,6 +47,18 @@ type JumpAddressToken = {
     text: string;
 };
 
+type LabelDefineToken = {
+    type: 'LABEL_DEFINE';
+    label: string;
+    text: string;
+};
+
+type LabelTargetToken = {
+    type: 'LABEL_TARGET';
+    label: string;
+    text: string;
+};
+
 type SpecialToken = {
     type: 'COMMENT' | 'WHITESPACE' | 'GARBAGE';
     text: string;
@@ -61,4 +73,6 @@ type Token =
     | UnaryOperatorToken
     | BinaryOperatorToken
     | JumpAddressToken
+    | LabelDefineToken
+    | LabelTargetToken
     | SpecialToken;
