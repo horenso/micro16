@@ -28,12 +28,17 @@ export const useCpuStore = defineStore('cpu', {
     actions: {
         activate() {
             const code = useCodeStore();
-            this.isActivated = !code.isDirty && code.code !== ''
+            this.isActivated = !code.isDirty && code.code !== '';
         },
         deactivate() {
             this.isActivated = false;
         },
         runInstruction() {
+            // Reset state
+            this.A = 0;
+            this.B = 0;
+            this.S = 0;
+
             if (!this.isActivated) {
                 return;
             }
