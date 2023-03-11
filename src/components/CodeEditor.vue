@@ -123,12 +123,13 @@ function onScroll() {
     color: grey;
 }
 
-.garbage {
-    text-decoration: underline wavy 1px rgba(255, 0, 0, 0.342);
-}
-
+.label,
 .number {
     color: #003eaa;
+}
+
+.garbage {
+    text-decoration: underline wavy 1px rgba(255, 0, 0, 0.342);
 }
 </style>
 
@@ -216,7 +217,7 @@ function onScroll() {
     border: none;
     resize: none;
     padding: 0;
-    margin: 0;
+    margin: 0 0 0 0.5em;
     height: 100%;
     color: transparent;
     font-size: inherit;
@@ -235,7 +236,7 @@ function onScroll() {
     left: 0;
     width: 100%;
     height: 100%;
-    margin: 0;
+    margin: 0 0 0 0.5em;
     box-sizing: border-box;
     pointer-events: none;
     overflow-y: auto;

@@ -93,6 +93,10 @@ export const useCodeStore = defineStore('code', {
                         case 'COMMENT':
                             lineContent += getSpan('comment', token.text, true);
                             break;
+                        case 'LABEL_DEFINE':
+                        case 'LABEL_TARGET':
+                            lineContent += getSpan('label', token.text, true);
+                            break;
                         case 'GARBAGE':
                             lineContent += getSpan('garbage', token.text, true);
                             break;
@@ -125,11 +129,6 @@ export const useCodeStore = defineStore('code', {
             this.code = newCode;
             this.assembledCode = [];
             this.isDirty = true;
-
-            // Set active line to last line just to test
-            // const newlineMatch = this.code.match(/\n/g);
-            // this.activeLineIndex =
-            //     newlineMatch !== null ? newlineMatch.length : 0;
         },
         assemble(): void {
             let newAssembledCode: number[] = [];
