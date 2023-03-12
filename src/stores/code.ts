@@ -31,12 +31,16 @@ function getSpan(className: string, text: string, doSanitize: boolean): string {
     }</span>`;
 }
 
+// Get code from localstorage is the key exists
+let localStorageCode = localStorage.getItem('code');
+const code = localStorageCode !== null ? JSON.parse(localStorageCode) : '';
+
 export const useCodeStore = defineStore('code', {
     state: (): CodeState => ({
-        code: '',
+        code: code,
         activeLineIndex: 0,
         assembledCode: [],
-        isDirty: false,
+        isDirty: code !== '',
         error: undefined,
     }),
     getters: {
@@ -122,6 +126,7 @@ export const useCodeStore = defineStore('code', {
             this.code = newCode;
             this.assembledCode = [];
             this.isDirty = true;
+            localStorage.setItem('code', JSON.stringify(this.code));
         },
         assemble(): void {
             this.error = undefined;
