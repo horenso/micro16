@@ -19,9 +19,9 @@ Location -> "0"
           | "AC"
 
 Operation -> Location
-           | ~ Location
-           | Location + Location
-           | Location & Location
+           | "~" Location
+           | Location "+" Location
+           | Location "&" Location
 
 Function -> "lsh" | "rsh"
 
