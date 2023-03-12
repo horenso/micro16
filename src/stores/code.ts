@@ -124,6 +124,7 @@ export const useCodeStore = defineStore('code', {
             this.isDirty = true;
         },
         assemble(): void {
+            this.error = undefined;
             const result = assembleCode(this.code.split('\n'));
             if (!result.ok) {
                 this.error = result.errorMessage;
