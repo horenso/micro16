@@ -4,7 +4,6 @@ import { useMemoryStore } from '@/stores/memory';
 import { useRegistersStore } from '@/stores/registers';
 import { useCodeStore } from '@/stores/code';
 import { useCpuStore } from '@/stores/cpu';
-import { createPinia } from 'pinia';
 
 const settingsStore = useSettingsStore();
 const cpuStore = useCpuStore();
@@ -40,6 +39,10 @@ function redo() {
     console.log('redo');
 }
 
+function run() {
+    // ...
+}
+
 function step() {
     cpuStore.runInstruction();
 }
@@ -57,9 +60,13 @@ function step() {
         <button @click="redo">Redo</button>
         <button @click="junk">Junk</button>
         <button @click="reset">Reset</button>
-        <button @click="toggleCpu" :disabled="codeStore.isDirty">
+        <button
+            @click="toggleCpu"
+            :disabled="codeStore.isDirty || codeStore.code === ''"
+        >
             {{ cpuStore.isActivated ? 'Turn off' : 'Turn on' }}
         </button>
+        <button @click="run" :disabled="!cpuStore.isActivated">Run</button>
         <button @click="step" :disabled="!cpuStore.isActivated">Step</button>
     </div>
 </template>
