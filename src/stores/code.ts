@@ -26,7 +26,7 @@ function sanitize(text: string): string {
 }
 
 function getSpan(className: string, text: string, doSanitize: boolean): string {
-    return `<span class=${className}>${
+    return `<span class="${className}">${
         doSanitize ? sanitize(text) : text
     }</span>`;
 }
@@ -108,15 +108,11 @@ export const useCodeStore = defineStore('code', {
                 const CpuStore = useCpuStore();
                 const isActiveLine =
                     CpuStore.isActivated && CpuStore.MIC === index;
-                if (isActiveLine) {
-                    highlightedCode += getSpan(
-                        'active-line',
-                        lineContent.length > 0 ? lineContent : '\n',
-                        false
-                    );
-                } else {
-                    highlightedCode += lineContent + '\n';
-                }
+                highlightedCode += getSpan(
+                    isActiveLine ? 'line active-line' : 'line',
+                    lineContent.length > 0 ? lineContent : '\n',
+                    false
+                );
             }
             return highlightedCode;
         },

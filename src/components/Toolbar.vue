@@ -66,16 +66,13 @@ function step() {
         >
             {{ cpuStore.isActivated ? 'Turn off' : 'Turn on' }}
         </button>
-        <font-awesome-icon icon="fa-solid fa-play"></font-awesome-icon>
         <button @click="run" :disabled="!cpuStore.isActivated">
-            <template v-if="cpuStore.isRunning">
-                Run<font-awesome-icon
-                    icon="fa-solid fa-play"
-                ></font-awesome-icon>
-            </template>
+            <template v-if="!cpuStore.isRunning">
+                <font-awesome-icon icon="fa-solid fa-play" /> Run</template
+            >
             <template v-else
-                >Pause<font-awesome-icon icon="fa-solid fa-pause"
-            /></template>
+                ><font-awesome-icon icon="fa-solid fa-pause" /> Pause</template
+            >
         </button>
         <button
             @click="step"
@@ -92,5 +89,9 @@ function step() {
     gap: 1em;
     background: grey;
     padding: 1em;
+}
+
+button {
+    padding: 0.5em;
 }
 </style>

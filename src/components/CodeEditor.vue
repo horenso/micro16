@@ -103,9 +103,13 @@ function onScroll() {
 
 <!-- Syntax highlighting classes: -->
 <style>
+.line {
+    display: block;
+    padding-left: 0.5em;
+}
+
 .active-line {
     background-color: #ff110041;
-    display: block;
 }
 
 .assembled-code-line-active {
@@ -239,7 +243,6 @@ function onScroll() {
     width: 100%;
     height: 100%;
     margin: 0;
-    padding-left: 0.5em;
     box-sizing: border-box;
     pointer-events: none;
     overflow-y: auto;
