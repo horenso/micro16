@@ -40,9 +40,9 @@ test('Calculations', () => {
     testAssembleSuccess('R0 <- R1 + R2', 0x0814_6500);
     testAssembleSuccess('R0 <- lsh(R1 + R2)', 0x0a146500);
     testAssembleSuccess('R0 <- rsh(R1 + R2)', 0x0c14_6500);
-    testAssembleSuccess('R1 <- 1 + (-1)', 0x0815_2100);
     testAssembleSuccess('R1 <- 1 + -1', 0x0815_2100);
-    testAssembleSuccess('R1 <- ~ (-1)', 0x1815_0200);
+    testAssembleSuccess('R1 <- 1 + -1', 0x0815_2100);
+    testAssembleSuccess('R1 <- ~ -1', 0x1815_0200);
 });
 
 test('Multiple registers', () => {
@@ -79,7 +79,7 @@ test('Multiplication Example', () => {
     testAssembleSuccess('(~R9); if N goto 21', 0x3800_0d15);
     testAssembleSuccess('R8 <- R8 + R10', 0x081c_ec00);
     testAssembleSuccess('R9 <- lsh(R9)', 0x021d_0d00);
-    testAssembleSuccess('R7 <- R7 + (-1)', 0x081b_2b00);
+    testAssembleSuccess('R7 <- R7 + -1', 0x081b_2b00);
     testAssembleSuccess('goto 17', 0x6000_0011);
     testAssembleSuccess('R6 <- R6 + R6', 0x081a_aa00);
     testAssembleSuccess('R6 <- R6 + 1', 0x081a_1a00);

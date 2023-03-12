@@ -71,7 +71,7 @@ test('Basic addition of two registers.', () => {
 });
 
 test('Parentheses with shift.', () => {
-    const input = 'R1 <- lsh(1+(-1))';
+    const input = 'R1 <- lsh(1+-1)';
     const expected: Token[] = [
         {
             type: 'LOCATION',
@@ -104,7 +104,7 @@ test('Parentheses with shift.', () => {
         {
             type: 'LOCATION',
             location: 'MINUS_ONE',
-            text: '(-1)',
+            text: '-1',
         },
         {
             type: 'R_PAREN',
@@ -157,6 +157,17 @@ test('1 vs ONE 0 vs ZERO', () => {
             readWrite: 'wr',
             text: 'wr',
         },
+    ];
+    testLexSuccess(input, expected);
+});
+
+test('lsh(-1)', () => {
+    let input = 'lsh(-1)';
+    let expected: Token[] = [
+        { type: 'FUNCTION', name: 'lsh', text: 'lsh' },
+        { type: 'L_PAREN', text: '(' },
+        { type: 'LOCATION', location: 'MINUS_ONE', text: '-1' },
+        { type: 'R_PAREN', text: ')' },
     ];
     testLexSuccess(input, expected);
 });

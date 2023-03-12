@@ -117,9 +117,9 @@ class Lexer {
     }
 
     private matchLocationOrFunction(): boolean {
-        // (-1) is only ever a register location, whereas
+        // -1 is only ever a register location, whereas
         // '1' could be a jump address or a operand.
-        const minusOneMatch = this.line.match(/^(-1|\(\s*-1\s*\))/);
+        const minusOneMatch = this.line.match(/^-1/);
         if (minusOneMatch !== null) {
             const match = minusOneMatch[0];
             this.result.push({
