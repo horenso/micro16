@@ -1,13 +1,15 @@
 import { test, expect } from 'vitest';
-import { ParsedInstruction } from './assembler/types';
-import { assembleCode, disassmble } from './assembling';
+import { assembleCode } from './assembling';
 
 function testAssembleSuccess(line: string, result: number) {
-    expect(assembleCode(line)).toMatchObject({ ok: true, result: result & -1 });
+    expect(assembleCode([line])).toMatchObject({
+        ok: true,
+        result: [result & -1],
+    });
 }
 
 function testAssembleError(line: string) {
-    expect(assembleCode(line)).toMatchObject({ ok: false });
+    expect(assembleCode([line])).toMatchObject({ ok: false });
 }
 
 test('Read/Write', () => {

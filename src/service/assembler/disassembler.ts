@@ -30,7 +30,7 @@ function getOperator(inst: number): Operator | undefined {
 }
 
 function getShift(inst: number): Shift | undefined {
-    const shiftEncoded = inst & 0x0400_0000;
+    const shiftEncoded = inst & 0x0600_0000;
     if (shiftEncoded === 0) {
         return undefined;
     }
