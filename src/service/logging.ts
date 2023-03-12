@@ -1,13 +1,13 @@
-const mode = import.meta.env.MODE;
+const doLogging = import.meta.env.MODE === 'development';
 
 export function log(message: any): void {
-    if (mode !== 'production') {
+    if (doLogging) {
         console.log(message);
     }
 }
 
 export function logTable(structure: any[]): void {
-    if (mode !== 'production') {
+    if (doLogging) {
         console.table(structure);
     }
 }
