@@ -12,6 +12,7 @@ interface CpuStore {
     MIC: number;
     MIR: number;
     isActivated: boolean;
+    isRunning: boolean;
 }
 
 export const useCpuStore = defineStore('cpu', {
@@ -24,6 +25,7 @@ export const useCpuStore = defineStore('cpu', {
         MIC: 0,
         MIR: 0,
         isActivated: false,
+        isRunning: false,
     }),
     actions: {
         activate() {
@@ -33,7 +35,11 @@ export const useCpuStore = defineStore('cpu', {
         deactivate() {
             this.isActivated = false;
         },
-        runInstruction() {
+        step() {
+            this.executeInstruction();
+        },
+        run() {},
+        executeInstruction() {
             // Reset state
             this.A = 0;
             this.B = 0;

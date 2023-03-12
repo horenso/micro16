@@ -40,11 +40,11 @@ function redo() {
 }
 
 function run() {
-    // ...
+    cpuStore.isRunning = !cpuStore.isRunning;
 }
 
 function step() {
-    cpuStore.runInstruction();
+    cpuStore.step();
 }
 </script>
 
@@ -66,8 +66,15 @@ function step() {
         >
             {{ cpuStore.isActivated ? 'Turn off' : 'Turn on' }}
         </button>
-        <button @click="run" :disabled="!cpuStore.isActivated">Run</button>
-        <button @click="step" :disabled="!cpuStore.isActivated">Step</button>
+        <button @click="run" :disabled="!cpuStore.isActivated">
+            {{ cpuStore.isRunning ? 'Run' : 'Pause' }}
+        </button>
+        <button
+            @click="step"
+            :disabled="!cpuStore.isActivated || cpuStore.isRunning"
+        >
+            Step
+        </button>
     </div>
 </template>
 
