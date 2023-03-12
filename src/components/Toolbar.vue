@@ -6,29 +6,29 @@ import { useCodeStore } from '@/stores/code';
 import { useCpuStore } from '@/stores/cpu';
 import { createPinia } from 'pinia';
 
-const settings = useSettingsStore();
-const cpu = useCpuStore();
-const memory = useMemoryStore();
-const registers = useRegistersStore();
-const code = useCodeStore();
+const settingsStore = useSettingsStore();
+const cpuStore = useCpuStore();
+const memoryStore = useMemoryStore();
+const registersStore = useRegistersStore();
+const codeStore = useCodeStore();
 
 function junk() {
-    memory.junk();
-    registers.junk();
+    memoryStore.junk();
+    registersStore.junk();
 }
 
 function reset() {
-    memory.$reset();
-    registers.$reset();
-    cpu.$reset();
+    memoryStore.$reset();
+    registersStore.$reset();
+    cpuStore.$reset();
 }
 
 function toggleCpu() {
-    if (!cpu.isActivated) {
-        cpu.$reset();
-        cpu.activate();
+    if (!cpuStore.isActivated) {
+        cpuStore.$reset();
+        cpuStore.activate();
     } else {
-        cpu.deactivate();
+        cpuStore.deactivate();
     }
 }
 
@@ -41,26 +41,26 @@ function redo() {
 }
 
 function step() {
-    cpu.runInstruction();
+    cpuStore.runInstruction();
 }
 </script>
 
 <template>
     <div class="toolbar">
-        <select v-model.number="settings.numberSystem">
+        <select v-model.number="settingsStore.numberSystem">
             <option value="2">Binary</option>
             <option value="10">Decimal</option>
             <option value="16">Hexadecimal</option>
         </select>
-        <button @click="code.assemble">Assemble</button>
+        <button @click="codeStore.assemble">Assemble</button>
         <button @click="undo">Undo</button>
         <button @click="redo">Redo</button>
         <button @click="junk">Junk</button>
         <button @click="reset">Reset</button>
-        <button @click="toggleCpu">
-            {{ cpu.isActivated ? 'Turn off' : 'Turn on' }}
+        <button @click="toggleCpu" :disabled="codeStore.isDirty">
+            {{ cpuStore.isActivated ? 'Turn off' : 'Turn on' }}
         </button>
-        <button @click="step" :disabled="!cpu.isActivated">Step</button>
+        <button @click="step" :disabled="!cpuStore.isActivated">Step</button>
     </div>
 </template>
 
