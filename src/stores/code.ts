@@ -1,14 +1,9 @@
 import { defineStore } from 'pinia';
-import { assembleLine } from '@/service/assembling';
+import { assembleCode } from '@/service/assembling';
 import { formatNumber } from '@/service/formatting';
 import { useSettingsStore } from '@/stores/settings';
 import { lexNeverFail } from '@/service/assembler/lexer';
 import { useCpuStore } from './cpu';
-
-interface ErrorReport {
-    lineNumber: number;
-    errorMessage: string;
-}
 
 interface CodeState {
     code: string;
@@ -16,7 +11,7 @@ interface CodeState {
     assembledCode: number[];
     // Whether the code has been edited since last assembling.
     isDirty: boolean;
-    errors: ErrorReport[];
+    error?: string;
 }
 
 // TODO: Investigate h() and generated components for this
@@ -42,14 +37,12 @@ export const useCodeStore = defineStore('code', {
         activeLineIndex: 0,
         assembledCode: [],
         isDirty: false,
-        errors: [],
+        error: undefined,
     }),
     getters: {
         assembledCodeString: (state): string => {
-            if (state.errors.length > 0) {
-                return state.errors
-                    .map((e) => `${e.lineNumber}: ${e.errorMessage}`)
-                    .join('\n');
+            if (state.error !== undefined) {
+                return state.error;
             }
             if (state.isDirty) {
                 return 'Code changed - please Assemble';
@@ -131,27 +124,14 @@ export const useCodeStore = defineStore('code', {
             this.isDirty = true;
         },
         assemble(): void {
-            let newAssembledCode: number[] = [];
-            this.errors = [];
-            const lines = this.code.split('\n');
-            for (let i = 0; i < lines.length; ++i) {
-                const line = lines[i];
-                const result = assembleLine(line);
-                if (!result.ok) {
-                    this.errors.push({
-                        lineNumber: i,
-                        errorMessage: result.errorMessage,
-                    });
-                } else {
-                    newAssembledCode.push(result.result);
-                }
+            const result = assembleCode(this.code.split('\n'));
+            if (!result.ok) {
+                this.error = result.errorMessage;
+                this.assembledCode = [];
+                return;
             }
             this.isDirty = false;
-            if (this.errors.length > 0) {
-                this.assembledCode = [];
-            } else {
-                this.assembledCode = newAssembledCode;
-            }
+            this.assembledCode = result.result;
         },
     },
 });
