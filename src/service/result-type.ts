@@ -1,6 +1,7 @@
-export type Result<T> =
-    | { ok: true; result: T }
-    | { ok: false; errorMessage: string };
+export type Success<T> = { ok: true; result: T };
+export type Failure<T> = { ok: false; errorMessage: string };
+
+export type Result<T> = Success<T> | Failure<T>;
 
 export type EmptyResult = { ok: true } | { ok: false; errorMessage: string };
 

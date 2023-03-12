@@ -1,4 +1,4 @@
-import { Ok, Result } from '@/service/result-type';
+import { Err, Failure, Ok, Result } from '@/service/result-type';
 import { assemble } from '@/service/assembler/assembler';
 import { parse } from '@/service/assembler/parser';
 import { lex } from '@/service/assembler/lexer';
@@ -8,51 +8,54 @@ import {
     resolveTargetLabels,
 } from '@/service/assembler/label-resolver';
 import { Token } from './assembler/token';
+import { log, logTable } from '@/service/logging';
 
-const mode = import.meta.env.MODE;
+function errorWithLineNumber<T>(
+    error: Failure<T>,
+    lineNumber: number
+): Failure<T> {
+    error.errorMessage = `Line ${lineNumber}: ${error.errorMessage}`;
+    return error;
+}
 
 export function assembleCode(code: string[]): Result<number[]> {
     const lexedLines: Token[][] = [];
-    for (let line of code) {
+    for (const [lineNumber, line] of code.entries()) {
         const lexResult = lex(line);
         if (!lexResult.ok) {
-            return lexResult;
+            return errorWithLineNumber(lexResult, lineNumber);
         }
-        if (mode !== 'production') {
-            console.log('Tokens');
-            console.table(lexResult.result);
-        }
+        log('Tokens');
+        logTable(lexResult.result);
         lexedLines.push(lexResult.result);
     }
 
     const labels = new Map<string, number>();
-    for (let [lineNumber, tokens] of lexedLines.entries()) {
+    for (const [lineNumber, tokens] of lexedLines.entries()) {
         resolveDefinitionLabel(tokens, lineNumber, labels);
     }
 
     const result: number[] = [];
-    for (const tokens of lexedLines) {
+    for (const [lineNumber, tokens] of lexedLines.entries()) {
         const resolveResult = resolveTargetLabels(tokens, labels);
         if (!resolveResult.ok) {
-            return resolveResult;
+            return errorWithLineNumber(resolveResult, lineNumber);
         }
 
         const parseResult = parse(tokens);
         if (!parseResult.ok) {
-            return parseResult;
+            return errorWithLineNumber(parseResult, lineNumber);
         }
-        if (mode !== 'production') {
-            console.log('Parsed Statement');
-            console.log(parseResult.result);
-        }
+        log('Parsed Statement');
+        log(parseResult.result);
+
         const analyzedResult = analyze(parseResult.result);
         if (!analyzedResult.ok) {
-            return analyzedResult;
+            return errorWithLineNumber(analyzedResult, lineNumber);
         }
-        if (mode !== 'production') {
-            console.log('Analyzed Statement');
-            console.log(analyzedResult.result);
-        }
+        log('Analyzed Statement');
+        log(analyzedResult.result);
+
         result.push(assemble(analyzedResult.result));
     }
     return Ok(result);

@@ -222,7 +222,7 @@ class Lexer {
                     this.result.push({ type: 'GARBAGE', text: this.line });
                     return Ok(this.result);
                 } else {
-                    return Err(`Invalid token: '${this.line}'.`);
+                    return Err(`Invalid token '${this.line}'.`);
                 }
             }
         }

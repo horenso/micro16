@@ -7,7 +7,7 @@ export function resolveDefinitionLabel(
     labels: Map<string, number>
 ): void {
     const lastToken = lineTokens[lineTokens.length - 1];
-    if (lastToken.type === 'LABEL_DEFINE') {
+    if (lastToken?.type === 'LABEL_DEFINE') {
         labels.set(lastToken.label, lineNumber);
         lineTokens.pop();
     }
