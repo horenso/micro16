@@ -217,7 +217,8 @@ function onScroll() {
     border: none;
     resize: none;
     padding: 0;
-    margin: 0 0 0 0.5em;
+    margin: 0;
+    padding-left: 0.5em;
     height: 100%;
     color: transparent;
     font-size: inherit;
@@ -236,7 +237,8 @@ function onScroll() {
     left: 0;
     width: 100%;
     height: 100%;
-    margin: 0 0 0 0.5em;
+    margin: 0;
+    padding-left: 0.5em;
     box-sizing: border-box;
     pointer-events: none;
     overflow-y: auto;
