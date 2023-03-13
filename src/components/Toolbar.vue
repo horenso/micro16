@@ -55,9 +55,18 @@ function step() {
             <option value="10">Decimal</option>
             <option value="16">Hexadecimal</option>
         </select>
-        <button @click="codeStore.assemble">Assemble</button>
-        <button @click="undo">Undo</button>
-        <button @click="redo">Redo</button>
+        <button @click="codeStore.assemble">
+            Download <font-awesome-icon icon="fa-floppy-disk" />
+        </button>
+        <button @click="codeStore.assemble">
+            Assemble <font-awesome-icon icon="fa-gear" />
+        </button>
+        <button @click="undo">
+            <font-awesome-icon icon="fa-rotate-left" />
+        </button>
+        <button @click="redo">
+            <font-awesome-icon icon="fa-rotate-right" />
+        </button>
         <button @click="junk">Junk</button>
         <button @click="reset">Reset</button>
         <button
