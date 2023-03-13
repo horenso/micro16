@@ -95,9 +95,10 @@ function step() {
 <style scoped>
 .toolbar {
     display: flex;
-    gap: 1em;
-    background: grey;
-    padding: 1em;
+    flex-wrap: wrap;
+    gap: 0.5em;
+    background: #b1c6d0;
+    padding: 0.5em;
 }
 
 button {
