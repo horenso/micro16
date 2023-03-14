@@ -34,7 +34,7 @@ export function assembleCode(code: string[]): Result<number[]> {
     for (const [lineNumber, tokens] of lexedLines.entries()) {
         const defineResult = resolveDefinitionLabel(tokens, lineNumber, labels);
         if (!defineResult.ok) {
-            return defineResult;
+            return errorWithLineNumber(defineResult, lineNumber);
         }
     }
 
