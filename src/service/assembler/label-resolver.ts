@@ -9,7 +9,7 @@ export function resolveDefinitionLabel(
     const lastToken = lineTokens[lineTokens.length - 1];
     if (lastToken?.type === 'LABEL_DEFINE') {
         if (labels.has(lastToken.label)) {
-            return Err(`Label "${lastToken.label}" has already been defined.`);
+            return Err(`Label "${lastToken.label}" already defined.`);
         }
         labels.set(lastToken.label, lineNumber);
         lineTokens.pop();
