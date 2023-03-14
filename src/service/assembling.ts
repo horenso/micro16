@@ -32,7 +32,10 @@ export function assembleCode(code: string[]): Result<number[]> {
 
     const labels = new Map<string, number>();
     for (const [lineNumber, tokens] of lexedLines.entries()) {
-        resolveDefinitionLabel(tokens, lineNumber, labels);
+        const defineResult = resolveDefinitionLabel(tokens, lineNumber, labels);
+        if (!defineResult.ok) {
+            return defineResult;
+        }
     }
 
     const result: number[] = [];

@@ -5,12 +5,16 @@ export function resolveDefinitionLabel(
     lineTokens: Token[],
     lineNumber: number,
     labels: Map<string, number>
-): void {
+): EmptyResult {
     const lastToken = lineTokens[lineTokens.length - 1];
     if (lastToken?.type === 'LABEL_DEFINE') {
+        if (labels.has(lastToken.label)) {
+            return Err(`Label "${lastToken.label}" has already been defined.`);
+        }
         labels.set(lastToken.label, lineNumber);
         lineTokens.pop();
     }
+    return EmptyOk();
 }
 
 export function resolveTargetLabels(
