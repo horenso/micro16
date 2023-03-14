@@ -50,10 +50,15 @@ export const useCpuStore = defineStore('cpu', {
 
             this.isRunning = true;
             const settingsStore = useSettingsStore();
-            this.runTimer = setInterval(
-                () => this.executeInstruction(),
-                1000 / settingsStore.frequency
-            );
+            const codeStore = useCodeStore();
+            this.runTimer = setInterval(() => {
+                if (codeStore.breakpoints.has(this.MIC)) {
+                    this.pause();
+                    console.log('breakpoint found at ', this.MIC);
+                    return;
+                }
+                this.executeInstruction();
+            }, 1000 / settingsStore.frequency);
         },
         pause(): void {
             clearInterval(this.runTimer);

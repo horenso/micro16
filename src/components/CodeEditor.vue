@@ -46,6 +46,17 @@ function onScroll() {
     const overlay = codeOverlayRef.value as HTMLPreElement;
     overlay.scrollLeft = textarea.scrollLeft;
 }
+
+function setBreakpoint(lineNumber: number, event: Event) {
+    const checked = event.target.checked;
+    if (checked) {
+        codeStore.breakpoints.add(lineNumber);
+    } else {
+        codeStore.breakpoints.delete(lineNumber);
+    }
+
+    console.log('setBreakpoint', lineNumber);
+}
 </script>
 
 <template>
@@ -57,7 +68,11 @@ function onScroll() {
                     :key="i"
                     class="line-number"
                 >
-                    <input type="checkbox" class="breakpoint" />
+                    <input
+                        type="checkbox"
+                        class="breakpoint"
+                        @change="setBreakpoint(i, $event)"
+                    />
                     <span
                         class="line-number-text"
                         :class="{

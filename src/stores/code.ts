@@ -12,6 +12,7 @@ interface CodeState {
     // Whether the code has been edited since last assembling.
     isDirty: boolean;
     error?: string;
+    breakpoints: Set<number>;
 }
 
 // TODO: Investigate h() and generated components for this
@@ -42,6 +43,7 @@ export const useCodeStore = defineStore('code', {
         assembledCode: [],
         isDirty: code !== '',
         error: undefined,
+        breakpoints: new Set<number>(),
     }),
     getters: {
         assembledCodeString: (state): string => {
