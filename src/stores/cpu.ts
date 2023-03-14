@@ -2,6 +2,7 @@ import { defineStore } from 'pinia';
 import { disassemble } from '@/service/assembler/disassembler';
 import { useRegistersStore } from './registers';
 import { useCodeStore } from './code';
+import { useSettingsStore } from './settings';
 
 interface CpuStore {
     MAR: number;
@@ -13,6 +14,7 @@ interface CpuStore {
     MIR: number;
     isActivated: boolean;
     isRunning: boolean;
+    runTimer?: NodeJS.Timer;
 }
 
 export const useCpuStore = defineStore('cpu', {
@@ -26,20 +28,39 @@ export const useCpuStore = defineStore('cpu', {
         MIR: 0,
         isActivated: false,
         isRunning: false,
+        runTimer: undefined,
     }),
     actions: {
-        activate() {
+        activate(): void {
             const code = useCodeStore();
             this.isActivated = !code.isDirty && code.code !== '';
         },
-        deactivate() {
+        deactivate(): void {
             this.isActivated = false;
+            clearInterval(this.runTimer);
+            this.runTimer = undefined;
         },
-        step() {
+        step(): void {
             this.executeInstruction();
         },
-        run() {},
-        executeInstruction() {
+        run(): void {
+            // Clear timer, this way it's safe to call run() multiple times.
+            clearInterval(this.runTimer);
+            this.runTimer = undefined;
+
+            this.isRunning = true;
+            const settingsStore = useSettingsStore();
+            this.runTimer = setInterval(
+                () => this.executeInstruction(),
+                1000 / settingsStore.frequency
+            );
+        },
+        pause(): void {
+            clearInterval(this.runTimer);
+            this.runTimer = undefined;
+            this.isRunning = false;
+        },
+        executeInstruction(): void {
             // Reset state
             this.A = 0;
             this.B = 0;

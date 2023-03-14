@@ -4,6 +4,7 @@ export const useSettingsStore = defineStore('settings', {
     state: () => {
         return {
             numberSystem: 16,
+            frequency: 1,
         };
     },
 });

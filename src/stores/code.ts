@@ -49,7 +49,7 @@ export const useCodeStore = defineStore('code', {
                 return state.error;
             }
             if (state.isDirty) {
-                return 'Code changed - please Assemble';
+                return 'Code changed\nPlease assemble';
             }
             return state.assembledCode
                 .map((code) =>
