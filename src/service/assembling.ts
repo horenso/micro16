@@ -1,4 +1,4 @@
-import { Err, Failure, Ok, Result } from '@/service/result-type';
+import { EmptyOk, Err, Failure, Ok, Result } from '@/service/result-type';
 import { assemble } from '@/service/assembler/assembler';
 import { parse } from '@/service/assembler/parser';
 import { lex } from '@/service/assembler/lexer';
@@ -40,6 +40,10 @@ export function assembleCode(code: string[]): Result<number[]> {
 
     const result: number[] = [];
     for (const [lineNumber, tokens] of lexedLines.entries()) {
+        const isLastLine = lineNumber === lexedLines.length - 1;
+        if (isLastLine && code[lineNumber] === '') {
+            break; // Skip last line if it's empty
+        }
         const resolveResult = resolveTargetLabels(tokens, labels);
         if (!resolveResult.ok) {
             return errorWithLineNumber(resolveResult, lineNumber);

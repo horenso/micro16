@@ -36,6 +36,7 @@ export const useCpuStore = defineStore('cpu', {
             this.isActivated = !code.isDirty && code.code !== '';
         },
         deactivate(): void {
+            this.isRunning = false;
             this.isActivated = false;
             clearInterval(this.runTimer);
             this.runTimer = undefined;
@@ -77,12 +78,14 @@ export const useCpuStore = defineStore('cpu', {
             const registers = useRegistersStore();
             const code = useCodeStore();
 
-            const fetchedInstruction = code.assembledCode[this.MIC];
-            this.MIR =
-                fetchedInstruction !== undefined ? fetchedInstruction : 0;
+            // Last line reached or jumped outside
+            if (this.MIC >= code.assembledCode.length - 1) {
+                this.deactivate();
+            }
+            this.MIR = code.assembledCode[this.MIC];
             const inst = disassemble(this.MIR);
 
-            // 1) Load values onto A and B bus
+            // Load values onto A and B bus
             this.A = registers.at(inst.busA);
             this.B = registers.at(inst.busB);
 

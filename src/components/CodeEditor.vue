@@ -91,6 +91,7 @@ function setBreakpoint(lineNumber: number, event: Event) {
                     rows="10"
                     :value="codeStore.code"
                     :disabled="cpuStore.isActivated"
+                    :title="cpuStore.isActivated ? 'Turn off to edit code' : ''"
                     @input="onInput"
                     @keydown.tab.prevent="onTab"
                     @scroll="onScroll"
