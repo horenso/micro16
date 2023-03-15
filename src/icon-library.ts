@@ -6,17 +6,8 @@ import {
     faPause,
     faFloppyDisk,
     faGear,
-    faRotateLeft,
-    faRotateRight,
 } from '@fortawesome/free-solid-svg-icons';
 
 export function importIcons() {
-    library.add(
-        faPlay,
-        faPause,
-        faFloppyDisk,
-        faGear,
-        faRotateLeft,
-        faRotateRight
-    );
+    library.add(faPlay, faPause, faFloppyDisk, faGear);
 }

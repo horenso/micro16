@@ -56,16 +56,10 @@ function step() {
             <option value="16">Hexadecimal</option>
         </select>
         <button @click="codeStore.assemble">
-            Download <font-awesome-icon icon="fa-floppy-disk" />
+            Download <fa-icon icon="fa-floppy-disk" />
         </button>
         <button @click="codeStore.assemble">
-            Assemble <font-awesome-icon icon="fa-gear" />
-        </button>
-        <button @click="undo">
-            <font-awesome-icon icon="fa-rotate-left" />
-        </button>
-        <button @click="redo">
-            <font-awesome-icon icon="fa-rotate-right" />
+            Assemble <fa-icon icon="fa-gear" />
         </button>
         <button @click="reset">Reset</button>
         <button
@@ -73,20 +67,21 @@ function step() {
             :disabled="codeStore.isDirty || codeStore.code === ''"
         >
             {{ cpuStore.isActivated ? 'Turn off' : 'Turn on' }}
+            <fa-icon icon="fa-power-off" />
         </button>
         <button
             v-if="!cpuStore.isRunning"
             :disabled="!cpuStore.isActivated"
             @click="cpuStore.run"
         >
-            <font-awesome-icon icon="fa-solid fa-play" /> Run
+            <fa-icon icon="fa-solid fa-play" /> Run
         </button>
         <button
             v-else
             :disabled="!cpuStore.isActivated"
             @click="cpuStore.pause"
         >
-            <font-awesome-icon icon="fa-solid fa-pause" /> Pause
+            <fa-icon icon="fa-solid fa-pause" /> Pause
         </button>
         <input
             type="number"

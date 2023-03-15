@@ -8,7 +8,7 @@ import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
 importIcons();
 
 const pinia = createPinia();
-const app = createApp(App).component('font-awesome-icon', FontAwesomeIcon);
+const app = createApp(App).component('fa-icon', FontAwesomeIcon);
 
 app.use(pinia);
 app.mount('#app');
