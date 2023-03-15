@@ -21,7 +21,7 @@ export const REGISTER_NAMES = [
 
 const STORED_VALUES = 13;
 
-function getRegisterValue(index: number, data: Int16Array): number {
+function getRegisterValue(index: number, data: number[]): number {
     if (index === 0) {
         return 0;
     } else if (index === 1) {
@@ -35,9 +35,13 @@ function getRegisterValue(index: number, data: Int16Array): number {
 
 export const REGISTER_COUNT = REGISTER_NAMES.length;
 
+interface RegisterStore {
+    registers: number[];
+}
+
 export const useRegistersStore = defineStore('registers', {
-    state: () => ({
-        registers: new Int16Array(STORED_VALUES),
+    state: (): RegisterStore => ({
+        registers: new Array(STORED_VALUES).fill(0),
     }),
     getters: {
         at: (state) => {
@@ -55,21 +59,12 @@ export const useRegistersStore = defineStore('registers', {
         },
     },
     actions: {
-        junk(): void {
-            const newRegisters = new Int16Array(STORED_VALUES);
-            for (let i = 0; i < REGISTER_COUNT; i++) {
-                newRegisters[i] = Math.floor(Math.random() * (2 ** 16 - 1));
-            }
-            this.registers = newRegisters;
-        },
         set(index: number, newValue: number): void {
-            const newRegisters: Int16Array = Int16Array.from(this.registers);
             if (index < 3 || index > 15) {
                 console.log('Invalid SET of register!', index);
                 return;
             }
-            newRegisters[index - 3] = newValue;
-            this.registers = newRegisters;
+            this.registers[index - 3] = newValue;
         },
     },
 });

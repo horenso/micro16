@@ -81,7 +81,7 @@ export const useCpuStore = defineStore('cpu', {
             const memoryStore = useMemoryStore();
 
             // Last line reached or jumped outside
-            if (this.MIC >= codeStore.assembledCode.length - 1) {
+            if (this.MIC >= codeStore.assembledCode.length) {
                 this.deactivate();
             }
             this.MIR = codeStore.assembledCode[this.MIC];

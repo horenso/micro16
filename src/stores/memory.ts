@@ -8,13 +8,13 @@ interface Access {
 }
 
 interface MemoryState {
-    memory: Int16Array;
+    memory: number[];
     lastAccess?: Access;
 }
 
 export const useMemoryStore = defineStore('memory', {
     state: (): MemoryState => ({
-        memory: new Int16Array(CAPACITY),
+        memory: new Array(CAPACITY).fill(0),
         lastAccess: undefined,
     }),
     getters: {
@@ -24,11 +24,9 @@ export const useMemoryStore = defineStore('memory', {
     },
     actions: {
         junk(): void {
-            const newMemory = new Int16Array(CAPACITY);
             for (let i = 0; i < CAPACITY; i++) {
-                newMemory[i] = Math.floor(Math.random() * (2 ** 16 - 1));
+                this.memory[i] = Math.floor(Math.random() * (2 ** 16 - 1));
             }
-            this.memory = newMemory;
         },
         readAccess(address: number): number | undefined {
             if (address < 0 || address > CAPACITY) {

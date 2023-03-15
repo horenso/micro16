@@ -2,7 +2,9 @@
 import { ref, computed } from 'vue';
 import { formatNumber } from '@/service/formatting';
 import { useSettingsStore } from '@/stores/settings';
-import { useMemoryStore, CAPACITY } from '@/stores/memory';
+import { CAPACITY, useMemoryStore } from '@/stores/memory';
+import { useRegistersStore } from '@/stores/registers';
+import { storeToRefs } from 'pinia';
 
 const TABLE_SIZE = 10;
 const MAX_OFFSET = CAPACITY - TABLE_SIZE;
@@ -12,7 +14,8 @@ const offsetComputed = computed(() => {
     return isNaN(offset.value) ? 0 : offset.value;
 });
 
-const memory = useMemoryStore();
+const { at } = storeToRefs(useMemoryStore());
+
 const settings = useSettingsStore();
 
 function updateOffset(event: Event) {
@@ -57,10 +60,7 @@ function scrollDown(event) {
             </td>
             <td class="numberValue">
                 {{
-                    formatNumber(
-                        memory.at(i + offsetComputed),
-                        settings.numberSystem
-                    )
+                    formatNumber(at(i + offsetComputed), settings.numberSystem)
                 }}
             </td>
         </tr>

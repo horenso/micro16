@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import { formatNumber } from '@/service/formatting';
-import { useCpuStore } from '@/stores/cpu';
 import { useRegistersStore, REGISTER_NAMES } from '@/stores/registers';
 import { useSettingsStore } from '@/stores/settings';
 import { storeToRefs } from 'pinia';

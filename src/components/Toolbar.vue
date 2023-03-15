@@ -13,11 +13,6 @@ const memoryStore = useMemoryStore();
 const registersStore = useRegistersStore();
 const codeStore = useCodeStore();
 
-function junk() {
-    memoryStore.junk();
-    registersStore.junk();
-}
-
 function reset() {
     memoryStore.$reset();
     registersStore.$reset();
@@ -72,7 +67,6 @@ function step() {
         <button @click="redo">
             <font-awesome-icon icon="fa-rotate-right" />
         </button>
-        <button @click="junk">Junk</button>
         <button @click="reset">Reset</button>
         <button
             @click="toggleCpu"
