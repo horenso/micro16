@@ -3,6 +3,7 @@ import { disassemble } from '@/service/assembler/disassembler';
 import { useRegistersStore } from './registers';
 import { useCodeStore } from './code';
 import { useSettingsStore } from './settings';
+import { useMemoryStore } from './memory';
 
 interface CpuStore {
     MAR: number;
@@ -75,19 +76,20 @@ export const useCpuStore = defineStore('cpu', {
             if (!this.isActivated) {
                 return;
             }
-            const registers = useRegistersStore();
-            const code = useCodeStore();
+            const registersStore = useRegistersStore();
+            const codeStore = useCodeStore();
+            const memoryStore = useMemoryStore();
 
             // Last line reached or jumped outside
-            if (this.MIC >= code.assembledCode.length - 1) {
+            if (this.MIC >= codeStore.assembledCode.length - 1) {
                 this.deactivate();
             }
-            this.MIR = code.assembledCode[this.MIC];
+            this.MIR = codeStore.assembledCode[this.MIC];
             const inst = disassemble(this.MIR);
 
             // Load values onto A and B bus
-            this.A = registers.at(inst.busA);
-            this.B = registers.at(inst.busB);
+            this.A = registersStore.at(inst.busA);
+            this.B = registersStore.at(inst.busB);
 
             // Write to MAR from B
             if (inst.marFlag) {
@@ -146,9 +148,22 @@ export const useCpuStore = defineStore('cpu', {
                 this.MBR = this.S;
             }
 
+            // Read / Write
+            if (inst.readWrite !== undefined) {
+                const memoryStore = useMemoryStore();
+                if (inst.readWrite === 'rd') {
+                    const read = memoryStore.readAccess(this.MAR);
+                    if (read !== undefined) {
+                        this.MBR = read;
+                    }
+                } else {
+                    memoryStore.writeAccess(this.MAR, this.MBR);
+                }
+            }
+
             // Write S out to register
             if (inst.ensFlag) {
-                registers.set(inst.busS, this.S);
+                registersStore.set(inst.busS, this.S);
             }
         },
     },
