@@ -31,7 +31,7 @@ function updateOffset(event: Event) {
 
 function scrollDown(event) {
     const wheelDelta = Math.ceil(event.wheelDelta);
-    const newOffset = offset.value - wheelDelta * 0.1;
+    const newOffset = Math.trunc(offset.value - wheelDelta * 0.1);
     if (wheelDelta > 0) {
         offset.value = newOffset < 0 ? 0 : newOffset;
     } else {
