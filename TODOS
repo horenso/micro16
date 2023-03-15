@@ -1,2 +1,3 @@
 -) Narrow type of DisassembledInstruction bus{A,B,S} to 1 | 2 ... 14 | 15
--) Implement undo/redo buttons
+-) Implement undo/redo buttons (native api)
+-) Don't go into pause immediately when on a breakpoint already (except first?!)
