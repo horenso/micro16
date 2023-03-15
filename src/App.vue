@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import Toolbar from '@/components/Toolbar.vue';
-import Memory from '@/components/Memory.vue';
+import MemoryTable from '@/components/MemoryTable.vue';
 import Registers from '@/components/Registers.vue';
 import CodeEditor from '@/components/CodeEditor.vue';
 import { useCpuStore } from './stores/cpu';
@@ -15,7 +15,7 @@ const registersStore = useRegistersStore();
     <CodeEditor />
     <div class="grid-container">
         <div class="grid-item"><Registers /></div>
-        <div class="grid-item"><Memory /></div>
+        <div class="grid-item"><MemoryTable /></div>
     </div>
     {{ cpuStore.$state }}
 </template>
