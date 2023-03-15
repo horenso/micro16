@@ -19,6 +19,9 @@ function errorWithLineNumber<T>(
 }
 
 export function assembleCode(code: string[]): Result<number[]> {
+    if (code.length > 256) {
+        return Err('Only 256 instructions allowed.');
+    }
     const lexedLines: Token[][] = [];
     for (const [lineNumber, line] of code.entries()) {
         const lexResult = lex(line);
