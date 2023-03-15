@@ -28,12 +28,19 @@ function toggleCpu() {
     }
 }
 
-function undo() {
-    console.log('undo');
-}
+function download() {
+    const textToSave = codeStore.code;
+    const filename = 'code.txt';
+    const blob = new Blob([textToSave], { type: 'text/plain;charset=utf-8' });
 
-function redo() {
-    console.log('redo');
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    window.URL.revokeObjectURL(url);
 }
 
 const { frequency } = storeToRefs(settingsStore);
@@ -55,7 +62,7 @@ function step() {
             <option value="10">Decimal</option>
             <option value="16">Hexadecimal</option>
         </select>
-        <button @click="codeStore.assemble">
+        <button @click="download">
             Download <fa-icon icon="fa-floppy-disk" />
         </button>
         <button @click="codeStore.assemble">
@@ -67,7 +74,6 @@ function step() {
             :disabled="codeStore.isDirty || codeStore.code === ''"
         >
             {{ cpuStore.isActivated ? 'Turn off' : 'Turn on' }}
-            <fa-icon icon="fa-power-off" />
         </button>
         <button
             v-if="!cpuStore.isRunning"
