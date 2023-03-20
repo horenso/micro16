@@ -111,3 +111,63 @@ test('R7 <- rsh(MBR & R2)', () => {
     };
     testDisassemble(0x941b_6000, expected);
 });
+
+test('goto 7', () => {
+    const expected: DisassembledInstruction = {
+        busA: 0,
+        busB: 0,
+        busS: 0,
+        operator: undefined,
+        shift: undefined,
+        marFlag: false,
+        mbrFlag: false,
+        aMuxFlag: false,
+        ensFlag: false,
+        jump: {
+            toAddress: 7,
+            condition: undefined,
+        },
+        readWrite: undefined,
+    };
+    testDisassemble(0x6000_0007, expected);
+});
+
+test('if N goto 11', () => {
+    const expected: DisassembledInstruction = {
+        busA: 0,
+        busB: 0,
+        busS: 0,
+        operator: undefined,
+        shift: undefined,
+        marFlag: false,
+        mbrFlag: false,
+        aMuxFlag: false,
+        ensFlag: false,
+        jump: {
+            toAddress: 11,
+            condition: 'N',
+        },
+        readWrite: undefined,
+    };
+    testDisassemble(0x2000_000b, expected);
+});
+
+test('goto Z goto 0', () => {
+    const expected: DisassembledInstruction = {
+        busA: 0,
+        busB: 0,
+        busS: 0,
+        operator: undefined,
+        shift: undefined,
+        marFlag: false,
+        mbrFlag: false,
+        aMuxFlag: false,
+        ensFlag: false,
+        jump: {
+            toAddress: 0,
+            condition: 'Z',
+        },
+        readWrite: undefined,
+    };
+    testDisassemble(0x4000_0000, expected);
+});

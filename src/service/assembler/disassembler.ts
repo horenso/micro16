@@ -1,18 +1,16 @@
 import { DisassembledInstruction, Jump, Operator, Shift } from './types';
 
 function getJump(inst: number): Jump | undefined {
-    const toAddress = inst & 0x0000_00ff;
-    if (toAddress === 0) {
-        return undefined;
-    }
     const conditionEncoded = inst & 0x6000_0000;
     let condition: undefined | 'N' | 'Z' = undefined;
-    if (conditionEncoded == 0x2000_0000) {
+    if (conditionEncoded === 0x2000_0000) {
         condition = 'N';
-    } else if (conditionEncoded == 0x4000_0000) {
+    } else if (conditionEncoded === 0x4000_0000) {
         condition = 'Z';
+    } else if (conditionEncoded !== 0x6000_0000) {
+        return undefined;
     }
-    return { condition: condition, toAddress: toAddress };
+    return { condition: condition, toAddress: inst & 0x0000_00ff };
 }
 
 function getOperator(inst: number): Operator | undefined {

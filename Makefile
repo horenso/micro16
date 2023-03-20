@@ -18,9 +18,9 @@ host: build-full
 	(docker stop micro16 && docker rm micro16) || true
 	docker run \
 		--rm \
-		--network=npm-network \
 		--name micro16 \
 		--detach \
+		--network=npm-network \
 		micro16-app-full .
 
 test: build-test
@@ -46,4 +46,4 @@ build-test:
 	docker build --target test --tag micro16-app-test .
 
 build-full:
-	docker build --target full --tag micro16-app-full .
+	docker build --target host --tag micro16-app-full .
