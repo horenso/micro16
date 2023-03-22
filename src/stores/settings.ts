@@ -5,6 +5,7 @@ export const useSettingsStore = defineStore('settings', {
         return {
             numberSystem: 16,
             frequency: 1,
+            showAssembly: true,
         };
     },
 });
