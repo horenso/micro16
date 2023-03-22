@@ -17,7 +17,6 @@ const registersStore = useRegistersStore();
         <div class="grid-item"><Registers /></div>
         <div class="grid-item"><MemoryHexEditor /></div>
     </div>
-    {{ cpuStore.$state }}
 </template>
 
 <style scoped>

@@ -3,9 +3,11 @@ import { ref } from 'vue';
 import { useCodeStore } from '@/stores/code';
 import { useCpuStore } from '@/stores/cpu';
 import { storeToRefs } from 'pinia';
+import { useSettingsStore } from '@/stores/settings';
 
 const codeStore = useCodeStore();
 const cpuStore = useCpuStore();
+const settingsStore = useSettingsStore();
 
 const textareaRef = ref<HTMLTextAreaElement>();
 const codeOverlayRef = ref<HTMLPreElement>();
@@ -60,7 +62,7 @@ function setBreakpoint(lineNumber: number, event: Event) {
 </script>
 
 <template>
-    <div class="wrapper">
+    <div class="wrapper" :class="{ 'two-cols': settingsStore.showAssembly }">
         <div class="editor">
             <div class="line-numbers">
                 <div
@@ -103,7 +105,7 @@ function setBreakpoint(lineNumber: number, event: Event) {
                 ></pre>
             </div>
         </div>
-        <div class="assembled-code">
+        <div class="assembled-code" v-if="settingsStore.showAssembly">
             <div
                 v-for="(line, i) in codeStore.assembledCodeString.split('\n')"
                 class="assembled-code-line"
@@ -157,11 +159,15 @@ function setBreakpoint(lineNumber: number, event: Event) {
 <style scoped>
 .wrapper {
     display: grid;
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: 1fr;
     justify-items: stretch;
     gap: 1em;
     padding: 1em;
     min-height: 10em;
+}
+
+.two-cols {
+    grid-template-columns: 1fr 1fr;
 }
 
 .wrapper > * {

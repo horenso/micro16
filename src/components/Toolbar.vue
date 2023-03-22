@@ -101,7 +101,14 @@ function step() {
             @click="step"
             :disabled="!cpuStore.isActivated || cpuStore.isRunning"
         >
-            Step
+            <fa-icon icon="fa-solid fa-arrow-rotate-right" /> Step
+        </button>
+        <button
+            @click="settingsStore.showAssembly = !settingsStore.showAssembly"
+        >
+            {{
+                settingsStore.showAssembly ? 'Hide Assembled' : 'Show Assembled'
+            }}
         </button>
     </div>
 </template>
