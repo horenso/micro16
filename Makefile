@@ -14,14 +14,14 @@ start-dev: build-base
 stop-dev:
 	docker stop micro16-dev
 
-host: build-full
-	(docker stop micro16 && docker rm micro16) || true
+host: build-host
+	# (docker stop micro16) || true
 	docker run \
 		--rm \
 		--name micro16 \
 		--detach \
 		--network=npm-network \
-		micro16-app-full .
+		micro16-app-host
 
 test: build-test
 	docker run \
@@ -45,5 +45,5 @@ build-base:
 build-test:
 	docker build --target test --tag micro16-app-test .
 
-build-full:
-	docker build --target host --tag micro16-app-full .
+build-host:
+	docker build --target host --tag micro16-app-host .
