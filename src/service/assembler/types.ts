@@ -1,7 +1,7 @@
 import { Readable, RegisterOrConstant, Writable } from '@/service/registers';
 
 const OPERATOR = ['+', '&', '~'] as const;
-export type Operator = typeof OPERATOR[number];
+export type Operator = (typeof OPERATOR)[number];
 export function isOperator(str?: string): str is Operator {
     if (str === undefined) {
         return false;

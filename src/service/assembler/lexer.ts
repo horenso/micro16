@@ -17,7 +17,10 @@ export function lexNeverFail(line: string): Token[] {
 class Lexer {
     private result: Token[] = [];
 
-    constructor(private line: string, private verboseAndNeverFail: boolean) {}
+    constructor(
+        private line: string,
+        private verboseAndNeverFail: boolean
+    ) {}
 
     private advance(amount: number) {
         this.line = this.line.slice(amount);
